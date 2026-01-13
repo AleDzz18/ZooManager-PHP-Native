@@ -1,0 +1,30 @@
+# --- Configuraciones del Sistema ---
+# Ignorar el archivo de conexión real para no exponer usuario/password de la BD
+config/db.php
+
+# --- Archivos del Entorno de Desarrollo (IDE) ---
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# --- Archivos del Sistema Operativo ---
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# --- Temporales de PHP y Servidor ---
+*.log
+error_log
+access_log
+.htaccess_local
+
+# --- Archivos de Usuario / Subidas ---
+# Ignoramos las imágenes que subas para probar, 
+# pero mantenemos la carpeta assets/img
+assets/img/*
+!assets/img/.gitkeep
