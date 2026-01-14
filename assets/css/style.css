@@ -1,0 +1,169 @@
+/* --- ESTILOS GENERALES --- */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9; /* Color de fondo suave */
+    color: #333;
+}
+
+.container {
+    width: 90%;
+    max-width: 1000px; /* Ancho máximo para que no se estire mucho */
+    margin: 0 auto;    /* Centrar contenido */
+    padding: 20px 0;
+}
+
+/* --- BARRA DE NAVEGACIÓN --- */
+.main-nav {
+    background-color: #2c3e50; /* Azul oscuro corporativo */
+    color: white;
+    padding: 15px 0;
+}
+
+.nav-container {
+    display: flex;             /* Pone el logo y el menú en la misma línea */
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+}
+
+/* --- MENÚ --- */
+.menu {
+    list-style: none; /* Quita los puntos de la lista */
+    margin: 0;
+    padding: 0;
+    display: flex;    /* Pone los botones uno al lado del otro */
+    gap: 20px;        /* Espacio entre botones */
+}
+
+.menu a {
+    color: #ecf0f1;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.menu a:hover {
+    color: #3498db; /* Azul claro al pasar el mouse */
+}
+
+/* --- BOTONES ESPECIALES --- */
+.btn-register {
+    background-color: #3498db;
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+.menu .btn-register:hover {
+    color: white; 
+    background-color: #154e73;
+}
+
+.btn-logout {
+    background-color: #e74c3c; /* Rojo para salir */
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+/* --- TABLAS (Para el futuro CRUD) --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #2c3e50;
+    color: white;
+}
+
+/* --- ESTILOS DE FORMULARIOS --- */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+}
+
+.auth-card {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Importante para que el padding no estire el input */
+}
+
+.btn-submit {
+    width: 100%;
+    background-color: #27ae60; /* Verde zoológico */
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-submit:hover {
+    background-color: #219150;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 0.9em;
+}
+
+/* --- ESTILOS DE ALERTAS --- */
+.alert {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    text-align: center;
+    font-weight: bold;
+}
+
+.alert-error {
+    background-color: #f8d7da; /* Rojo suave */
+    color: #721c24;           /* Texto rojo oscuro */
+    border: 1px solid #f5c6cb;
+}
+
+.alert-success {
+    background-color: #d4edda; /* Verde suave */
+    color: #155724;           /* Texto verde oscuro */
+    border: 1px solid #c3e6cb;
+}
