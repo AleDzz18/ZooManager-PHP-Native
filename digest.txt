@@ -2,11 +2,21 @@ Directory structure:
 └── zoo-system/
     ├── README.md
     ├── index.php
-    └── includes/
-        ├── auth_check.php
-        ├── footer.php
-        ├── functions.php
-        └── header.php
+    ├── actions/
+    │   └── auth/
+    │       └── register_action.php
+    ├── assets/
+    │   └── css/
+    │       └── style.css
+    ├── includes/
+    │   ├── auth_check.php
+    │   ├── footer.php
+    │   ├── functions.php
+    │   └── header.php
+    └── views/
+        └── auth/
+            ├── login.php
+            └── register.php
 
 ================================================
 FILE: README.md
@@ -54,7 +64,265 @@ Crea el archivo config/db.php (no se sube al repo por seguridad) con tus credenc
 ================================================
 FILE: index.php
 ================================================
-[Empty file]
+<?php 
+require 'includes/header.php'; // Carga el menú y el CSS
+?>
+
+<div style="text-align: center; padding: 50px 0;">
+    <h1>🦁 Bienvenido al Sistema ZooManager</h1>
+    <p>Gestión integral de hábitats y animales.</p>
+    
+    <?php if (!isset($_SESSION['user_id'])): ?>
+        <p>Por favor, inicia sesión para gestionar el zoológico.</p>
+    <?php else: ?>
+        <p>Sistema listo para operar.</p>
+    <?php endif; ?>
+</div>
+
+<?php 
+require 'includes/footer.php'; // Carga el pie de página
+?>
+
+
+================================================
+FILE: actions/auth/register_action.php
+================================================
+<?php
+// 1. INICIAR SESIÓN
+// La necesitamos para guardar mensajes de error o éxito que mostraremos en la vista.
+session_start();
+
+// 2. IMPORTAR LA CONEXIÓN (La "llave" del zoológico)
+// Usamos ../../ para salir de actions/auth/ y llegar a la carpeta config/
+require_once '../../config/db.php';
+
+// 3. VERIFICAR QUE LOS DATOS LLEGUEN POR POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    
+    // 4. CAPTURAR Y LIMPIAR LOS DATOS
+    // trim() elimina espacios vacíos accidentales al inicio o final.
+    $nombre = trim($_POST['nombre_completo']);
+    $email = trim($_POST['email']);
+    $password_plana = $_POST['password']; // La clave tal cual la escribió el usuario
+    $rol = $_POST['rol'];
+
+    // 5. VALIDACIÓN BÁSICA (Manejo de errores exigido)
+    if (empty($nombre) || empty($email) || empty($password_plana)) {
+        $_SESSION['error'] = "Todos los campos son obligatorios.";
+        header("Location: ../../views/auth/register.php");
+        exit();
+    }
+
+    try {
+        // 6. VERIFICAR SI EL EMAIL YA EXISTE
+        // Usamos una "Consulta Preparada" (PDO) para evitar Inyección SQL.
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        
+        if ($stmt->fetch()) {
+            $_SESSION['error'] = "Este correo ya está registrado en el sistema.";
+            header("Location: ../../views/auth/register.php");
+            exit();
+        }
+
+        // 7. ENCRIPTAR LA CONTRASEÑA (Requisito Obligatorio #1)
+        // Nunca guardamos claves en texto plano. password_hash crea una versión ilegible.
+        $password_encriptada = password_hash($password_plana, PASSWORD_DEFAULT);
+
+        // 8. INSERTAR EL NUEVO USUARIO
+        $sql = "INSERT INTO users (nombre_completo, email, password, rol) VALUES (?, ?, ?, ?)";
+        $insert = $pdo->prepare($sql);
+        $insert->execute([$nombre, $email, $password_encriptada, $rol]);
+
+        // 9. ÉXITO: REDIRECCIONAR AL LOGIN
+        $_SESSION['success'] = "Usuario registrado correctamente. Ya puedes iniciar sesión.";
+        header("Location: ../../views/auth/login.php");
+        exit();
+
+    } catch (PDOException $e) {
+        // 10. MANEJO DE ERRORES CRÍTICOS
+        die("Error técnico en la base de datos: " . $e->getMessage());
+    }
+
+} else {
+    // Si alguien intenta entrar a este archivo directamente por la URL, lo mandamos al registro.
+    header("Location: ../../views/auth/register.php");
+    exit();
+}
+
+
+================================================
+FILE: assets/css/style.css
+================================================
+/* --- ESTILOS GENERALES --- */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f9; /* Color de fondo suave */
+    color: #333;
+}
+
+.container {
+    width: 90%;
+    max-width: 1000px; /* Ancho mÃ¡ximo para que no se estire mucho */
+    margin: 0 auto;    /* Centrar contenido */
+    padding: 20px 0;
+}
+
+/* --- BARRA DE NAVEGACIÃ“N --- */
+.main-nav {
+    background-color: #2c3e50; /* Azul oscuro corporativo */
+    color: white;
+    padding: 15px 0;
+}
+
+.nav-container {
+    display: flex;             /* Pone el logo y el menÃº en la misma lÃ­nea */
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+}
+
+/* --- MENÃš --- */
+.menu {
+    list-style: none; /* Quita los puntos de la lista */
+    margin: 0;
+    padding: 0;
+    display: flex;    /* Pone los botones uno al lado del otro */
+    gap: 20px;        /* Espacio entre botones */
+}
+
+.menu a {
+    color: #ecf0f1;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+.menu a:hover {
+    color: #3498db; /* Azul claro al pasar el mouse */
+}
+
+/* --- BOTONES ESPECIALES --- */
+.btn-register {
+    background-color: #3498db;
+    padding: 8px 15px;
+    border-radius: 5px;
+}
+
+.menu .btn-register:hover {
+    color: white; 
+    background-color: #154e73;
+}
+
+.btn-logout {
+    background-color: #e74c3c; /* Rojo para salir */
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+/* --- TABLAS (Para el futuro CRUD) --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background: white;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #2c3e50;
+    color: white;
+}
+
+/* --- ESTILOS DE FORMULARIOS --- */
+.auth-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 70vh;
+}
+
+.auth-card {
+    background: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 400px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input, .form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Importante para que el padding no estire el input */
+}
+
+.btn-submit {
+    width: 100%;
+    background-color: #27ae60; /* Verde zoolÃ³gico */
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.btn-submit:hover {
+    background-color: #219150;
+}
+
+.auth-link {
+    text-align: center;
+    margin-top: 15px;
+    font-size: 0.9em;
+}
+
+/* --- ESTILOS DE ALERTAS --- */
+.alert {
+    padding: 12px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    text-align: center;
+    font-weight: bold;
+}
+
+.alert-error {
+    background-color: #f8d7da; /* Rojo suave */
+    color: #721c24;           /* Texto rojo oscuro */
+    border: 1px solid #f5c6cb;
+}
+
+.alert-success {
+    background-color: #d4edda; /* Verde suave */
+    color: #155724;           /* Texto verde oscuro */
+    border: 1px solid #c3e6cb;
+}
 
 
 ================================================
@@ -66,7 +334,12 @@ FILE: includes/auth_check.php
 ================================================
 FILE: includes/footer.php
 ================================================
-[Empty file]
+        </main> 
+        <footer style="text-align: center; margin-top: 50px; padding: 20px; color: #777; font-size: 0.9em;">
+            <p>&copy; 2026 ZooManager - Proyecto Universitario PHP Nativo</p>
+        </footer>
+    </body>
+</html>
 
 
 ================================================
@@ -78,5 +351,124 @@ FILE: includes/functions.php
 ================================================
 FILE: includes/header.php
 ================================================
+<?php
+// 1. INICIAR SESIÓN
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. DEFINIR RUTA BASE
+define('BASE_URL', 'http://localhost/zoo-system/');
+?>
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZooManager - Sistema de Gestión</title>
+    
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css">
+</head>
+<body>
+
+    <nav class="main-nav">
+        <div class="container nav-container">
+            <a href="<?php echo BASE_URL; ?>index.php" class="logo">🦁 ZooSystem</a>
+
+            <ul class="menu">
+                
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <li><span>Hola, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span></li>
+                    <li><a href="<?php echo BASE_URL; ?>views/admin/animals.php">Animales</a></li>
+                    <li><a href="<?php echo BASE_URL; ?>views/admin/habitats.php">Hábitats</a></li>
+                    <li><a href="<?php echo BASE_URL; ?>actions/auth/logout.php" class="btn-logout">Salir</a></li>
+
+                <?php else: ?>
+                    <li><a href="<?php echo BASE_URL; ?>index.php">Inicio</a></li>
+                    <li><a href="<?php echo BASE_URL; ?>views/auth/login.php">Entrar</a></li>
+                    <li><a href="<?php echo BASE_URL; ?>views/auth/register.php" class="btn-register">Registrarse</a></li>
+                <?php endif; ?>
+                
+            </ul>
+        </div>
+    </nav>
+    
+    <main class="container">
+
+
+================================================
+FILE: views/auth/login.php
+================================================
 [Empty file]
+
+
+================================================
+FILE: views/auth/register.php
+================================================
+<?php
+// 1. Incluimos el header para mantener el menÃº y el diseÃ±o 
+// Usamos ../../ para subir dos niveles y encontrar la carpeta includes
+require '../../includes/header.php';
+?>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Registro de Personal</h2>
+        <p>Crea una cuenta para acceder al sistema ZooManager.</p>
+
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-error">
+                <?php 
+                    echo $_SESSION['error']; 
+                    unset($_SESSION['error']); // Borramos el error para que no aparezca de nuevo al refrescar
+                ?>
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success">
+                <?php 
+                    echo $_SESSION['success']; 
+                    unset($_SESSION['success']); 
+                ?>
+            </div>
+        <?php endif; ?>
+
+        <form action="<?php echo BASE_URL; ?>actions/auth/register_action.php" method="POST" class="form-standard">
+            
+            <div class="form-group">
+                <label for="nombre">Nombre Completo:</label>
+                <input type="text" name="nombre_completo" id="nombre" required placeholder="Ej: Juan PÃ©rez">
+            </div>
+
+            <div class="form-group">
+                <label for="email">Correo ElectrÃ³nico:</label>
+                <input type="email" name="email" id="email" required placeholder="usuario@zoolÃ³gico.com">
+            </div>
+
+            <div class="form-group">
+                <label for="password">ContraseÃ±a:</label>
+                <input type="password" name="password" id="password" required minlength="6" placeholder="MÃ­nimo 6 caracteres">
+            </div>
+
+            <div class="form-group">
+                <label for="rol">Rol Asignado:</label>
+                <select name="rol" id="rol" required>
+                    <option value="cuidador">Cuidador (Acceso limitado)</option>
+                    <option value="admin">Administrador (Acceso total)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit">Registrar Personal</button>
+        </form>
+
+        <p class="auth-link">Â¿Ya tienes una cuenta? <a href="login.php">Inicia sesiÃ³n aquÃ­</a></p>
+    </div>
+</div>
+
+<?php
+// 3. Incluimos el footer para cerrar las etiquetas HTML
+require '../../includes/footer.php';
+?>
 
