@@ -4,6 +4,8 @@ Directory structure:
     ├── index.php
     ├── actions/
     │   └── auth/
+    │       ├── login_action.php
+    │       ├── logout.php
     │       └── register_action.php
     ├── assets/
     │   └── css/
@@ -81,6 +83,116 @@ require 'includes/header.php'; // Carga el menú y el CSS
 
 <?php 
 require 'includes/footer.php'; // Carga el pie de página
+?>
+
+
+================================================
+FILE: actions/auth/login_action.php
+================================================
+<?php
+// 1. INICIAR SESIÓN
+// Necesario para guardar los datos del usuario si el login es exitoso.
+session_start();
+
+// 2. CONEXIÓN A LA BASE DE DATOS
+require_once '../../config/db.php';
+
+// 3. VERIFICAR MÉTODO POST
+// Solo procesamos si los datos vienen del formulario.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // 4. LIMPIEZA DE DATOS
+    // Usamos trim() para quitar espacios accidentales.
+    $email = trim($_POST['email']);
+    $password_ingresada = $_POST['password'];
+
+    // 5. VALIDACIÓN DE CAMPOS VACÍOS
+    if (empty($email) || empty($password_ingresada)) {
+        $_SESSION['error'] = "Por favor, completa todos los campos.";
+        header("Location: ../../views/auth/login.php");
+        exit();
+    }
+
+    try {
+        // 6. BUSCAR AL USUARIO POR EMAIL
+        // Preparamos la consulta SQL para evitar inyección de código.
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        
+        // fetch(PDO::FETCH_ASSOC) nos devuelve los datos del usuario como un array asociativo.
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // 7. VERIFICACIÓN DE CREDENCIALES
+        // Revisamos dos cosas:
+        // A) ¿Existe el usuario? ($usuario no es falso)
+        // B) ¿La contraseña coincide? Usamos password_verify() que compara texto plano vs hash.
+        if ($usuario && password_verify($password_ingresada, $usuario['password'])) {
+            
+            // --- ¡LOGIN EXITOSO! ---
+
+            // 8. GUARDAR DATOS EN LA SESIÓN
+            // Estas variables estarán disponibles en TODAS las páginas (header.php las usa).
+            $_SESSION['user_id'] = $usuario['id'];
+            $_SESSION['user_name'] = $usuario['nombre_completo'];
+            $_SESSION['user_role'] = $usuario['rol']; // Importante para permisos de Admin/Cuidador
+
+            // 9. REDIRECCIONAR AL DASHBOARD
+            // Por ahora vamos al inicio, pero luego iremos al panel de administración.
+            header("Location: ../../index.php");
+            exit();
+
+        } else {
+            // --- LOGIN FALLIDO ---
+            
+            // Nota de Seguridad: No decimos "El usuario no existe" o "La contraseña está mal".
+            // Decimos "Credenciales incorrectas" para no dar pistas a hackers.
+            $_SESSION['error'] = "Credenciales incorrectas. Inténtalo de nuevo.";
+            header("Location: ../../views/auth/login.php");
+            exit();
+        }
+
+    } catch (PDOException $e) {
+        // 10. ERROR TÉCNICO
+        die("Error en el sistema de login: " . $e->getMessage());
+    }
+
+} else {
+    // Si intentan entrar directo por URL, los devolvemos al formulario.
+    header("Location: ../../views/auth/login.php");
+    exit();
+}
+
+
+================================================
+FILE: actions/auth/logout.php
+================================================
+<?php
+// 1. INICIAR LA SESIÃ“N
+// Aunque suene contradictorio, necesitamos "entrar" a la sesiÃ³n actual para poder destruirla.
+session_start();
+
+// 2. LIMPIAR TODAS LAS VARIABLES DE SESIÃ“N
+// Vaciamos el array $_SESSION para borrar datos como el ID, nombre y rol de la memoria inmediata.
+$_SESSION = [];
+
+// 3. DESTRUIR LA COOKIE DE SESIÃ“N (Limpieza profunda)
+// Esto borra la "llave" fÃ­sica que estaba guardada en el navegador del usuario.
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
+}
+
+// 4. DESTRUIR LA SESIÃ“N EN EL SERVIDOR
+// Esto elimina el archivo fÃ­sico en el servidor donde se guardaban los datos.
+session_destroy();
+
+// 5. REDIRECCIONAR AL LOGIN
+// Enviamos al usuario fuera del sistema.
+header("Location: ../../views/auth/login.php");
+exit();
 ?>
 
 
@@ -328,7 +440,32 @@ th {
 ================================================
 FILE: includes/auth_check.php
 ================================================
-[Empty file]
+<?php
+// 1. VERIFICAR EL ESTADO DE LA SESIÓN
+// Si la sesión no ha iniciado, la iniciamos para poder leer $_SESSION.
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. COMPROBAR SI EL USUARIO ESTÁ LOGUEADO
+// Verificamos si la variable 'user_id' existe en la sesión.
+if (!isset($_SESSION['user_id'])) {
+    
+    // 3. MENSAJE DE SEGURIDAD
+    // Guardamos un mensaje para mostrarlo en el login.
+    $_SESSION['error'] = "Acceso denegado. Debes iniciar sesión para ver esa página.";
+
+    // 4. REDIRECCIÓN FORZADA
+    // Enviamos al intruso de vuelta al Login.
+    // Nota: Asumimos que este archivo se usa en carpetas tipo views/admin/
+    header("Location: ../../views/auth/login.php");
+    
+    // 5. DETENER EJECUCIÓN (CRÍTICO)
+    // Sin el exit(), el código de abajo se seguiría ejecutando en segundo plano
+    // aunque el navegador cambie de página. ¡Es un hueco de seguridad grave!
+    exit();
+}
+?>
 
 
 ================================================
@@ -400,7 +537,7 @@ define('BASE_URL', 'http://localhost/zoo-system/');
 ================================================
 FILE: views/auth/login.php
 ================================================
-[Empty file]
+Error reading file with 'cp1252': 'charmap' codec can't decode byte 0x81 in position 1763: character maps to <undefined>
 
 
 ================================================
