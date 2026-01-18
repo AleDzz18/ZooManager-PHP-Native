@@ -59,7 +59,7 @@ try {
                     
                     <?php foreach ($habitats as $h): ?>
                         <option value="<?php echo $h['id']; ?>">
-                            <?php echo htmlspecialchars($h['nombre']); ?>
+                            <?php echo limpiar($h['nombre']); ?>
                         </option>
                     <?php endforeach; ?>
                     

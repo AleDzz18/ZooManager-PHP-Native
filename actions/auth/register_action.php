@@ -6,14 +6,14 @@ session_start();
 // 2. IMPORTAR LA CONEXIÓN (La "llave" del zoológico)
 // Usamos ../../ para salir de actions/auth/ y llegar a la carpeta config/
 require_once '../../config/db.php';
+require_once '../../includes/functions.php';
 
 // 3. VERIFICAR QUE LOS DATOS LLEGUEN POR POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // 4. CAPTURAR Y LIMPIAR LOS DATOS
-    // trim() elimina espacios vacíos accidentales al inicio o final.
-    $nombre = trim($_POST['nombre_completo']);
-    $email = trim($_POST['email']);
+    $nombre = limpiar($_POST['nombre_completo']);
+    $email = limpiar($_POST['email']);
     $password_plana = $_POST['password']; // La clave tal cual la escribió el usuario
     $rol = $_POST['rol'];
 

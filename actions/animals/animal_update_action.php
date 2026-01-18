@@ -1,11 +1,12 @@
 <?php
 session_start();
 require_once '../../config/db.php';
+require_once '../../includes/functions.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'];
-    $nombre = trim($_POST['nombre']);
-    $especie = trim($_POST['especie']);
+    $nombre = limpiar($_POST['nombre']);
+    $especie = limpiar($_POST['especie']);
     $edad = $_POST['edad'];
     $fecha = $_POST['fecha_llegada'];
     $habitat_id = $_POST['habitat_id'];

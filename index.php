@@ -13,7 +13,7 @@ require 'includes/header.php';
 
     <?php if (isset($_SESSION['user_id'])): ?>
         <div class="dashboard-welcome">
-            <h1>👋 Hola, <?php echo htmlspecialchars($_SESSION['user_name']); ?></h1>
+            <h1>👋 Hola, <?php echo limpiar($_SESSION['user_name']); ?></h1>
             <p>Bienvenido al Panel de Control de ZooManager.</p>
             <p>Tu rol actual es: <strong><?php echo ucfirst($_SESSION['user_role'] ?? 'Usuario'); ?></strong></p>
         </div>

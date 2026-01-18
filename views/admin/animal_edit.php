@@ -25,19 +25,19 @@ try {
 
 <div class="auth-container">
     <div class="auth-card" style="max-width: 600px;">
-        <h2>Editar Animal: <?php echo htmlspecialchars($animal['nombre']); ?></h2>
+        <h2>Editar Animal: <?php echo limpiar($animal['nombre']); ?></h2>
         
         <form action="../../actions/animals/animal_update_action.php" method="POST" class="form-standard">
             <input type="hidden" name="id" value="<?php echo $animal['id']; ?>">
 
             <div class="form-group">
                 <label>Nombre:</label>
-                <input type="text" name="nombre" value="<?php echo htmlspecialchars($animal['nombre']); ?>" required>
+                <input type="text" name="nombre" value="<?php echo limpiar($animal['nombre']); ?>" required>
             </div>
 
             <div class="form-group">
                 <label>Especie:</label>
-                <input type="text" name="especie" value="<?php echo htmlspecialchars($animal['especie']); ?>" required>
+                <input type="text" name="especie" value="<?php echo limpiar($animal['especie']); ?>" required>
             </div>
 
             <div class="row" style="display:flex; gap:15px;">
@@ -56,7 +56,7 @@ try {
                 <select name="habitat_id" required>
                     <?php foreach ($habitats as $h): ?>
                         <option value="<?php echo $h['id']; ?>" <?php echo ($h['id'] == $animal['habitat_id']) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($h['nombre']); ?>
+                            <?php echo limpiar($h['nombre']); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>

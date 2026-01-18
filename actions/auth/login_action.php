@@ -5,14 +5,14 @@ session_start();
 
 // 2. CONEXIÓN A LA BASE DE DATOS
 require_once '../../config/db.php';
+require_once '../../includes/functions.php';
 
 // 3. VERIFICAR MÉTODO POST
 // Solo procesamos si los datos vienen del formulario.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 4. LIMPIEZA DE DATOS
-    // Usamos trim() para quitar espacios accidentales.
-    $email = trim($_POST['email']);
+    $email = limpiar($_POST['email']);
     $password_ingresada = $_POST['password'];
 
     // 5. VALIDACIÓN DE CAMPOS VACÍOS
