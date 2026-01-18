@@ -3,7 +3,13 @@ Directory structure:
     ├── README.md
     ├── index.php
     ├── actions/
+    │   ├── animals/
+    │   │   ├── animal_create_action.php
+    │   │   ├── animal_delete.php
+    │   │   └── animal_update_action.php
     │   └── auth/
+    │       ├── login_action.php
+    │       ├── logout.php
     │       └── register_action.php
     ├── assets/
     │   └── css/
@@ -14,6 +20,10 @@ Directory structure:
     │   ├── functions.php
     │   └── header.php
     └── views/
+        ├── admin/
+        │   ├── animal_create.php
+        │   ├── animal_edit.php
+        │   └── animals.php
         └── auth/
             ├── login.php
             └── register.php
@@ -81,6 +91,241 @@ require 'includes/header.php'; // Carga el menú y el CSS
 
 <?php 
 require 'includes/footer.php'; // Carga el pie de página
+?>
+
+
+================================================
+FILE: actions/animals/animal_create_action.php
+================================================
+<?php
+session_start();
+require_once '../../config/db.php';
+
+// 1. VERIFICAR MÉTODO POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // 2. CAPTURAR DATOS
+    $nombre = trim($_POST['nombre']);
+    $especie = trim($_POST['especie']);
+    $edad = $_POST['edad'];
+    $fecha = $_POST['fecha_llegada'];
+    $habitat_id = $_POST['habitat_id'];
+
+    // 3. VALIDACIÓN BÁSICA
+    if (empty($nombre) || empty($especie) || empty($habitat_id)) {
+        $_SESSION['error'] = "Por favor completa todos los campos obligatorios.";
+        header("Location: ../../views/admin/animal_create.php");
+        exit();
+    }
+
+    try {
+        // 4. INSERTAR EN BASE DE DATOS
+        // Fíjate que usamos "?" para evitar inyección SQL.
+        $sql = "INSERT INTO animals (nombre, especie, edad, fecha_llegada, habitat_id) 
+                VALUES (?, ?, ?, ?, ?)";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$nombre, $especie, $edad, $fecha, $habitat_id]);
+
+        // 5. REDIRECCIONAR CON ÉXITO
+        // No creamos mensaje de éxito en sesión todavía para no complicar, 
+        // pero volvemos a la lista para ver el nuevo animal.
+        header("Location: ../../views/admin/animals.php");
+        exit();
+
+    } catch (PDOException $e) {
+        // Manejo de error técnico
+        $_SESSION['error'] = "Error al guardar: " . $e->getMessage();
+        header("Location: ../../views/admin/animal_create.php");
+        exit();
+    }
+
+} else {
+    // Si intentan entrar directo por URL
+    header("Location: ../../views/admin/animals.php");
+    exit();
+}
+
+
+================================================
+FILE: actions/animals/animal_delete.php
+================================================
+<?php
+/*
+    ---------------------------------------------------
+    LÃ“GICA DE ELIMINACIÃ“N (DELETE)
+    ---------------------------------------------------
+*/
+session_start();
+require_once '../../config/db.php';
+require_once '../../includes/auth_check.php'; // Solo usuarios logueados borran
+
+// 1. OBTENER EL ID POR URL
+// El ID viene de: animal_delete.php?id=5
+$id = isset($_GET['id']) ? $_GET['id'] : null;
+
+if ($id) {
+    try {
+        // 2. PREPARAR LA ELIMINACIÃ“N
+        $sql = "DELETE FROM animals WHERE id = ?";
+        $stmt = $pdo->prepare($sql);
+        
+        // 3. EJECUTAR
+        if ($stmt->execute([$id])) {
+            $_SESSION['success'] = "Animal eliminado correctamente.";
+        } else {
+            $_SESSION['error'] = "No se pudo eliminar el registro.";
+        }
+
+    } catch (PDOException $e) {
+        $_SESSION['error'] = "Error de base de datos: " . $e->getMessage();
+    }
+}
+
+// 4. REDIRECCIONAR DE VUELTA A LA LISTA
+header("Location: ../../views/admin/animals.php");
+exit();
+?>
+
+
+================================================
+FILE: actions/animals/animal_update_action.php
+================================================
+<?php
+session_start();
+require_once '../../config/db.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = $_POST['id'];
+    $nombre = trim($_POST['nombre']);
+    $especie = trim($_POST['especie']);
+    $edad = $_POST['edad'];
+    $fecha = $_POST['fecha_llegada'];
+    $habitat_id = $_POST['habitat_id'];
+
+    try {
+        // Usamos la sentencia UPDATE con WHERE id = ?
+        $sql = "UPDATE animals SET nombre = ?, especie = ?, edad = ?, fecha_llegada = ?, habitat_id = ? WHERE id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$nombre, $especie, $edad, $fecha, $habitat_id, $id]);
+
+        $_SESSION['success'] = "Animal actualizado correctamente.";
+        header("Location: ../../views/admin/animals.php");
+        exit();
+
+    } catch (PDOException $e) {
+        die("Error al actualizar: " . $e->getMessage());
+    }
+}
+
+
+================================================
+FILE: actions/auth/login_action.php
+================================================
+<?php
+// 1. INICIAR SESIÓN
+// Necesario para guardar los datos del usuario si el login es exitoso.
+session_start();
+
+// 2. CONEXIÓN A LA BASE DE DATOS
+require_once '../../config/db.php';
+
+// 3. VERIFICAR MÉTODO POST
+// Solo procesamos si los datos vienen del formulario.
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // 4. LIMPIEZA DE DATOS
+    // Usamos trim() para quitar espacios accidentales.
+    $email = trim($_POST['email']);
+    $password_ingresada = $_POST['password'];
+
+    // 5. VALIDACIÓN DE CAMPOS VACÍOS
+    if (empty($email) || empty($password_ingresada)) {
+        $_SESSION['error'] = "Por favor, completa todos los campos.";
+        header("Location: ../../views/auth/login.php");
+        exit();
+    }
+
+    try {
+        // 6. BUSCAR AL USUARIO POR EMAIL
+        // Preparamos la consulta SQL para evitar inyección de código.
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
+        $stmt->execute([$email]);
+        
+        // fetch(PDO::FETCH_ASSOC) nos devuelve los datos del usuario como un array asociativo.
+        $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        // 7. VERIFICACIÓN DE CREDENCIALES
+        // Revisamos dos cosas:
+        // A) ¿Existe el usuario? ($usuario no es falso)
+        // B) ¿La contraseña coincide? Usamos password_verify() que compara texto plano vs hash.
+        if ($usuario && password_verify($password_ingresada, $usuario['password'])) {
+            
+            // --- ¡LOGIN EXITOSO! ---
+
+            // 8. GUARDAR DATOS EN LA SESIÓN
+            // Estas variables estarán disponibles en TODAS las páginas (header.php las usa).
+            $_SESSION['user_id'] = $usuario['id'];
+            $_SESSION['user_name'] = $usuario['nombre_completo'];
+            $_SESSION['user_role'] = $usuario['rol']; // Importante para permisos de Admin/Cuidador
+
+            // 9. REDIRECCIONAR AL DASHBOARD
+            // Por ahora vamos al inicio, pero luego iremos al panel de administración.
+            header("Location: ../../index.php");
+            exit();
+
+        } else {
+            // --- LOGIN FALLIDO ---
+            
+            // Nota de Seguridad: No decimos "El usuario no existe" o "La contraseña está mal".
+            // Decimos "Credenciales incorrectas" para no dar pistas a hackers.
+            $_SESSION['error'] = "Credenciales incorrectas. Inténtalo de nuevo.";
+            header("Location: ../../views/auth/login.php");
+            exit();
+        }
+
+    } catch (PDOException $e) {
+        // 10. ERROR TÉCNICO
+        die("Error en el sistema de login: " . $e->getMessage());
+    }
+
+} else {
+    // Si intentan entrar directo por URL, los devolvemos al formulario.
+    header("Location: ../../views/auth/login.php");
+    exit();
+}
+
+
+================================================
+FILE: actions/auth/logout.php
+================================================
+<?php
+// 1. INICIAR LA SESIÃ“N
+// Aunque suene contradictorio, necesitamos "entrar" a la sesiÃ³n actual para poder destruirla.
+session_start();
+
+// 2. LIMPIAR TODAS LAS VARIABLES DE SESIÃ“N
+// Vaciamos el array $_SESSION para borrar datos como el ID, nombre y rol de la memoria inmediata.
+$_SESSION = [];
+
+// 3. DESTRUIR LA COOKIE DE SESIÃ“N (Limpieza profunda)
+// Esto borra la "llave" fÃ­sica que estaba guardada en el navegador del usuario.
+if (ini_get("session.use_cookies")) {
+    $params = session_get_cookie_params();
+    setcookie(session_name(), '', time() - 42000,
+        $params["path"], $params["domain"],
+        $params["secure"], $params["httponly"]
+    );
+}
+
+// 4. DESTRUIR LA SESIÃ“N EN EL SERVIDOR
+// Esto elimina el archivo fÃ­sico en el servidor donde se guardaban los datos.
+session_destroy();
+
+// 5. REDIRECCIONAR AL LOGIN
+// Enviamos al usuario fuera del sistema.
+header("Location: ../../views/auth/login.php");
+exit();
 ?>
 
 
@@ -325,10 +570,37 @@ th {
 }
 
 
+
+
 ================================================
 FILE: includes/auth_check.php
 ================================================
-[Empty file]
+<?php
+// 1. VERIFICAR EL ESTADO DE LA SESIÓN
+// Si la sesión no ha iniciado, la iniciamos para poder leer $_SESSION.
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// 2. COMPROBAR SI EL USUARIO ESTÁ LOGUEADO
+// Verificamos si la variable 'user_id' existe en la sesión.
+if (!isset($_SESSION['user_id'])) {
+    
+    // 3. MENSAJE DE SEGURIDAD
+    // Guardamos un mensaje para mostrarlo en el login.
+    $_SESSION['error'] = "Acceso denegado. Debes iniciar sesión para ver esa página.";
+
+    // 4. REDIRECCIÓN FORZADA
+    // Enviamos al intruso de vuelta al Login.
+    // Nota: Asumimos que este archivo se usa en carpetas tipo views/admin/
+    header("Location: ../../views/auth/login.php");
+    
+    // 5. DETENER EJECUCIÓN (CRÍTICO)
+    // Sin el exit(), el código de abajo se seguiría ejecutando en segundo plano
+    // aunque el navegador cambie de página. ¡Es un hueco de seguridad grave!
+    exit();
+}
+?>
 
 
 ================================================
@@ -398,9 +670,170 @@ define('BASE_URL', 'http://localhost/zoo-system/');
 
 
 ================================================
+FILE: views/admin/animal_create.php
+================================================
+<?php
+// 1. EL GUARDIA DE SEGURIDAD
+require '../../includes/auth_check.php';
+require '../../includes/header.php';
+require '../../config/db.php';
+
+// 2. OBTENER LOS HÁBITATS PARA EL SELECT
+// Necesitamos llenar el menú desplegable con opciones reales de la BD.
+try {
+    // IMPORTANTE: Tu tabla usa 'nombre', no necesitamos cambiar esta consulta
+    $stmt = $pdo->query("SELECT id, nombre FROM habitats");
+    $habitats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $error = "Error al cargar hábitats.";
+}
+?>
+
+<div class="auth-container"> <div class="auth-card" style="max-width: 600px;"> <div class="admin-header">
+            <h2>Registrar Nuevo Animal</h2>
+            <a href="animals.php" class="btn-delete" style="background:#7f8c8d;">Cancelar</a>
+        </div>
+
+        <p>Completa los datos del nuevo integrante del zoológico.</p>
+
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-error">
+                <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+            </div>
+        <?php endif; ?>
+
+        <form action="../../actions/animals/animal_create_action.php" method="POST" class="form-standard">
+            
+            <div class="form-group">
+                <label>Nombre del Animal:</label>
+                <input type="text" name="nombre" required placeholder="Ej: Simba">
+            </div>
+
+            <div class="form-group">
+                <label>Especie:</label>
+                <input type="text" name="especie" required placeholder="Ej: León Africano">
+            </div>
+
+            <div class="row" style="display:flex; gap:15px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Edad (Años):</label>
+                    <input type="number" name="edad" required min="0">
+                </div>
+                
+                <div class="form-group" style="flex:1;">
+                    <label>Fecha de Llegada:</label>
+                    <input type="date" name="fecha_llegada" required value="<?php echo date('Y-m-d'); ?>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Asignar Hábitat:</label>
+                <select name="habitat_id" required>
+                    <option value="">-- Selecciona un hábitat --</option>
+                    
+                    <?php foreach ($habitats as $h): ?>
+                        <option value="<?php echo $h['id']; ?>">
+                            <?php echo htmlspecialchars($h['nombre']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                    
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit">Guardar Animal</button>
+        </form>
+    </div>
+</div>
+
+<?php require '../../includes/footer.php'; ?>
+
+
+================================================
+FILE: views/admin/animal_edit.php
+================================================
+<?php
+require '../../includes/auth_check.php';
+require '../../includes/header.php';
+require '../../config/db.php';
+
+// 1. OBTENER EL ANIMAL A EDITAR
+$id = $_GET['id'] ?? null;
+if (!$id) { header("Location: animals.php"); exit(); }
+
+try {
+    // Traemos los datos del animal
+    $stmt = $pdo->prepare("SELECT * FROM animals WHERE id = ?");
+    $stmt->execute([$id]);
+    $animal = $stmt->fetch();
+
+    // Traemos los hÃ¡bitats para el select
+    $h_stmt = $pdo->query("SELECT id, nombre FROM habitats");
+    $habitats = $h_stmt->fetchAll();
+
+    if (!$animal) { die("Animal no encontrado."); }
+} catch (PDOException $e) {
+    die("Error: " . $e->getMessage());
+}
+?>
+
+<div class="auth-container">
+    <div class="auth-card" style="max-width: 600px;">
+        <h2>Editar Animal: <?php echo htmlspecialchars($animal['nombre']); ?></h2>
+        
+        <form action="../../actions/animals/animal_update_action.php" method="POST" class="form-standard">
+            <input type="hidden" name="id" value="<?php echo $animal['id']; ?>">
+
+            <div class="form-group">
+                <label>Nombre:</label>
+                <input type="text" name="nombre" value="<?php echo htmlspecialchars($animal['nombre']); ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label>Especie:</label>
+                <input type="text" name="especie" value="<?php echo htmlspecialchars($animal['especie']); ?>" required>
+            </div>
+
+            <div class="row" style="display:flex; gap:15px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Edad:</label>
+                    <input type="number" name="edad" value="<?php echo $animal['edad']; ?>" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Fecha Llegada:</label>
+                    <input type="date" name="fecha_llegada" value="<?php echo $animal['fecha_llegada']; ?>" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>HÃ¡bitat:</label>
+                <select name="habitat_id" required>
+                    <?php foreach ($habitats as $h): ?>
+                        <option value="<?php echo $h['id']; ?>" <?php echo ($h['id'] == $animal['habitat_id']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($h['nombre']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit" style="background:#f39c12;">Actualizar Datos</button>
+            <a href="animals.php" style="display:block; text-align:center; margin-top:10px; color:#7f8c8d;">Volver atrÃ¡s</a>
+        </form>
+    </div>
+</div>
+
+<?php require '../../includes/footer.php'; ?>
+
+
+================================================
+FILE: views/admin/animals.php
+================================================
+Error reading file with 'cp1252': 'charmap' codec can't decode byte 0x90 in position 1109: character maps to <undefined>
+
+
+================================================
 FILE: views/auth/login.php
 ================================================
-[Empty file]
+Error reading file with 'cp1252': 'charmap' codec can't decode byte 0x81 in position 1763: character maps to <undefined>
 
 
 ================================================
