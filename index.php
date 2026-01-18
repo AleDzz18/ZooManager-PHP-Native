@@ -31,7 +31,7 @@ require 'includes/header.php';
                 <div style="font-size: 3em;">🌿</div>
                 <h3>Gestión de Hábitats</h3>
                 <p>Control de zonas y capacidades.</p>
-                <a href="#" class="btn-submit" style="display:block; margin-top:10px; text-decoration:none; background-color: #95a5a6;">Próximamente</a>
+                <a href="views/admin/habitats.php" class="btn-submit" style="display:block; margin-top:10px; text-decoration:none; background-color: #95a5a6;">Ir a Hábitats</a>
             </div>
 
         </div>

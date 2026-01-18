@@ -7,10 +7,12 @@ Directory structure:
     │   │   ├── animal_create_action.php
     │   │   ├── animal_delete.php
     │   │   └── animal_update_action.php
-    │   └── auth/
-    │       ├── login_action.php
-    │       ├── logout.php
-    │       └── register_action.php
+    │   ├── auth/
+    │   │   ├── login_action.php
+    │   │   ├── logout.php
+    │   │   └── register_action.php
+    │   └── habitats/
+    │       └── habitat_create_action.php
     ├── assets/
     │   └── css/
     │       └── style.css
@@ -23,7 +25,9 @@ Directory structure:
         ├── admin/
         │   ├── animal_create.php
         │   ├── animal_edit.php
-        │   └── animals.php
+        │   ├── animals.php
+        │   ├── habitat_create.php
+        │   └── habitats.php
         └── auth/
             ├── login.php
             └── register.php
@@ -74,24 +78,7 @@ Crea el archivo config/db.php (no se sube al repo por seguridad) con tus credenc
 ================================================
 FILE: index.php
 ================================================
-<?php 
-require 'includes/header.php'; // Carga el menú y el CSS
-?>
-
-<div style="text-align: center; padding: 50px 0;">
-    <h1>🦁 Bienvenido al Sistema ZooManager</h1>
-    <p>Gestión integral de hábitats y animales.</p>
-    
-    <?php if (!isset($_SESSION['user_id'])): ?>
-        <p>Por favor, inicia sesión para gestionar el zoológico.</p>
-    <?php else: ?>
-        <p>Sistema listo para operar.</p>
-    <?php endif; ?>
-</div>
-
-<?php 
-require 'includes/footer.php'; // Carga el pie de página
-?>
+Error reading file with 'cp1252': 'charmap' codec can't decode byte 0x90 in position 1079: character maps to <undefined>
 
 
 ================================================
@@ -100,18 +87,15 @@ FILE: actions/animals/animal_create_action.php
 <?php
 session_start();
 require_once '../../config/db.php';
+require_once '../../includes/functions.php';
 
-// 1. VERIFICAR MÉTODO POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-
-    // 2. CAPTURAR DATOS
-    $nombre = trim($_POST['nombre']);
-    $especie = trim($_POST['especie']);
-    $edad = $_POST['edad'];
+    $nombre = limpiar($_POST['nombre']);
+    $especie = limpiar($_POST['especie']);
+    $edad = limpiar($_POST['edad']);
     $fecha = $_POST['fecha_llegada'];
     $habitat_id = $_POST['habitat_id'];
 
-    // 3. VALIDACIÓN BÁSICA
     if (empty($nombre) || empty($especie) || empty($habitat_id)) {
         $_SESSION['error'] = "Por favor completa todos los campos obligatorios.";
         header("Location: ../../views/admin/animal_create.php");
@@ -119,31 +103,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     try {
-        // 4. INSERTAR EN BASE DE DATOS
-        // Fíjate que usamos "?" para evitar inyección SQL.
+        // --- INICIO DE VALIDACIÃ“N COMPLEJA ---
+        
+        // 1. Consultar la capacidad mÃ¡xima del hÃ¡bitat y cuÃ¡ntos animales tiene ya.
+        $sql_check = "SELECT 
+                        h.capacidad, 
+                        (SELECT COUNT(*) FROM animals WHERE habitat_id = h.id) as total_actual 
+                        FROM habitats h 
+                        WHERE h.id = ?";
+        
+        $stmt_check = $pdo->prepare($sql_check);
+        $stmt_check->execute([$habitat_id]);
+        $info_habitat = $stmt_check->fetch();
+
+        // 2. LÃ³gica de negocio: Comparar capacidad vs actual
+        if ($info_habitat['total_actual'] >= $info_habitat['capacidad']) {
+            $_SESSION['error'] = "El hÃ¡bitat seleccionado ya alcanzÃ³ su capacidad mÃ¡xima ({$info_habitat['capacidad']}).";
+            header("Location: ../../views/admin/animal_create.php");
+            exit();
+        }
+        
+        // --- FIN DE VALIDACIÃ“N COMPLEJA ---
+
+        // 4. INSERTAR (Si pasÃ³ la validaciÃ³n)
         $sql = "INSERT INTO animals (nombre, especie, edad, fecha_llegada, habitat_id) 
                 VALUES (?, ?, ?, ?, ?)";
-        
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$nombre, $especie, $edad, $fecha, $habitat_id]);
 
-        // 5. REDIRECCIONAR CON ÉXITO
-        // No creamos mensaje de éxito en sesión todavía para no complicar, 
-        // pero volvemos a la lista para ver el nuevo animal.
+        // 5. MENSAJE DE Ã‰XITO (Consistencia)
+        $_SESSION['success'] = "Â¡Animal registrado exitosamente en el sistema!";
         header("Location: ../../views/admin/animals.php");
         exit();
 
     } catch (PDOException $e) {
-        // Manejo de error técnico
-        $_SESSION['error'] = "Error al guardar: " . $e->getMessage();
+        $_SESSION['error'] = "Error tÃ©cnico: " . $e->getMessage();
         header("Location: ../../views/admin/animal_create.php");
         exit();
     }
-
-} else {
-    // Si intentan entrar directo por URL
-    header("Location: ../../views/admin/animals.php");
-    exit();
 }
 
 
@@ -159,6 +156,13 @@ FILE: actions/animals/animal_delete.php
 session_start();
 require_once '../../config/db.php';
 require_once '../../includes/auth_check.php'; // Solo usuarios logueados borran
+require_once '../../includes/functions.php';
+
+if (!esAdmin()) {
+    $_SESSION['error'] = "No tienes permisos para eliminar animales.";
+    header("Location: ../../views/admin/animals.php");
+    exit();
+}
 
 // 1. OBTENER EL ID POR URL
 // El ID viene de: animal_delete.php?id=5
@@ -194,27 +198,53 @@ FILE: actions/animals/animal_update_action.php
 <?php
 session_start();
 require_once '../../config/db.php';
+require_once '../../includes/functions.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'];
-    $nombre = trim($_POST['nombre']);
-    $especie = trim($_POST['especie']);
+    $nombre = limpiar($_POST['nombre']);
+    $especie = limpiar($_POST['especie']);
     $edad = $_POST['edad'];
     $fecha = $_POST['fecha_llegada'];
     $habitat_id = $_POST['habitat_id'];
 
     try {
-        // Usamos la sentencia UPDATE con WHERE id = ?
+        // --- VALIDACIÃ“N COMPLEJA PARA EDICIÃ“N ---
+        
+        // Verificamos si el animal estÃ¡ cambiando de hÃ¡bitat
+        $stmt_current = $pdo->prepare("SELECT habitat_id FROM animals WHERE id = ?");
+        $stmt_current->execute([$id]);
+        $current_habitat = $stmt_current->fetchColumn();
+
+        // Si el hÃ¡bitat destino es diferente al actual, verificamos cupo
+        if ($current_habitat != $habitat_id) {
+            $sql_check = "SELECT capacidad, 
+                        (SELECT COUNT(*) FROM animals WHERE habitat_id = h.id) as total 
+                        FROM habitats h WHERE id = ?";
+            $stmt_check = $pdo->prepare($sql_check);
+            $stmt_check->execute([$habitat_id]);
+            $res = $stmt_check->fetch();
+
+            if ($res['total'] >= $res['capacidad']) {
+                $_SESSION['error'] = "No se puede mover al animal. El hÃ¡bitat destino estÃ¡ lleno.";
+                header("Location: ../../views/admin/animal_edit.php?id=" . $id);
+                exit();
+            }
+        }
+
+        // --- ACTUALIZACIÃ“N ---
         $sql = "UPDATE animals SET nombre = ?, especie = ?, edad = ?, fecha_llegada = ?, habitat_id = ? WHERE id = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$nombre, $especie, $edad, $fecha, $habitat_id, $id]);
 
-        $_SESSION['success'] = "Animal actualizado correctamente.";
+        $_SESSION['success'] = "Datos del animal actualizados correctamente.";
         header("Location: ../../views/admin/animals.php");
         exit();
 
     } catch (PDOException $e) {
-        die("Error al actualizar: " . $e->getMessage());
+        $_SESSION['error'] = "Error al actualizar: " . $e->getMessage();
+        header("Location: ../../views/admin/animal_edit.php?id=" . $id);
+        exit();
     }
 }
 
@@ -229,14 +259,14 @@ session_start();
 
 // 2. CONEXIÓN A LA BASE DE DATOS
 require_once '../../config/db.php';
+require_once '../../includes/functions.php';
 
 // 3. VERIFICAR MÉTODO POST
 // Solo procesamos si los datos vienen del formulario.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 4. LIMPIEZA DE DATOS
-    // Usamos trim() para quitar espacios accidentales.
-    $email = trim($_POST['email']);
+    $email = limpiar($_POST['email']);
     $password_ingresada = $_POST['password'];
 
     // 5. VALIDACIÓN DE CAMPOS VACÍOS
@@ -340,14 +370,14 @@ session_start();
 // 2. IMPORTAR LA CONEXIÓN (La "llave" del zoológico)
 // Usamos ../../ para salir de actions/auth/ y llegar a la carpeta config/
 require_once '../../config/db.php';
+require_once '../../includes/functions.php';
 
 // 3. VERIFICAR QUE LOS DATOS LLEGUEN POR POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     // 4. CAPTURAR Y LIMPIAR LOS DATOS
-    // trim() elimina espacios vacíos accidentales al inicio o final.
-    $nombre = trim($_POST['nombre_completo']);
-    $email = trim($_POST['email']);
+    $nombre = limpiar($_POST['nombre_completo']);
+    $email = limpiar($_POST['email']);
     $password_plana = $_POST['password']; // La clave tal cual la escribió el usuario
     $rol = $_POST['rol'];
 
@@ -393,6 +423,59 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Si alguien intenta entrar a este archivo directamente por la URL, lo mandamos al registro.
     header("Location: ../../views/auth/register.php");
     exit();
+}
+
+
+================================================
+FILE: actions/habitats/habitat_create_action.php
+================================================
+<?php
+session_start();
+require_once '../../config/db.php';
+require_once '../../includes/functions.php'; // Necesario para la funciÃ³n limpiar
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // 1. Limpieza de datos
+    $nombre = limpiar($_POST['nombre']);
+    $tipo = limpiar($_POST['clima']);
+    $capacidad = (int) $_POST['capacidad'];
+    $descripcion = limpiar($_POST['descripcion']);
+
+    // 2. ValidaciÃ³n bÃ¡sica
+    if (empty($nombre) || empty($tipo) || $capacidad < 1) {
+        $_SESSION['error'] = "Por favor, revisa los campos. La capacidad debe ser al menos 1.";
+        header("Location: ../../views/admin/habitat_create.php");
+        exit();
+    }
+
+    try {
+        // 3. Verificar duplicados
+        // Regla de negocio: No pueden haber dos hÃ¡bitats con el mismo nombre exacto
+        $check = $pdo->prepare("SELECT id FROM habitats WHERE nombre = ?");
+        $check->execute([$nombre]);
+        
+        if ($check->rowCount() > 0) {
+            $_SESSION['error'] = "Error: Ya existe un hÃ¡bitat llamado '$nombre'.";
+            header("Location: ../../views/admin/habitat_create.php");
+            exit();
+        }
+
+        // 4. Insertar
+        $sql = "INSERT INTO habitats (nombre, clima, capacidad, descripcion) VALUES (?, ?, ?, ?)";
+        $stmt = $pdo->prepare($sql);
+        
+        if ($stmt->execute([$nombre, $tipo, $capacidad, $descripcion])) {
+            $_SESSION['success'] = "HÃ¡bitat '$nombre' creado exitosamente.";
+            header("Location: ../../views/admin/habitats.php");
+            exit();
+        }
+
+    } catch (PDOException $e) {
+        $_SESSION['error'] = "Error en base de datos: " . $e->getMessage();
+        header("Location: ../../views/admin/habitat_create.php");
+        exit();
+    }
 }
 
 
@@ -576,39 +659,27 @@ th {
 FILE: includes/auth_check.php
 ================================================
 <?php
-// 1. VERIFICAR EL ESTADO DE LA SESIÓN
-// Si la sesión no ha iniciado, la iniciamos para poder leer $_SESSION.
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 2. COMPROBAR SI EL USUARIO ESTÁ LOGUEADO
-// Verificamos si la variable 'user_id' existe en la sesión.
 if (!isset($_SESSION['user_id'])) {
+    $_SESSION['error'] = "Acceso denegado. Debes iniciar sesiÃ³n.";
     
-    // 3. MENSAJE DE SEGURIDAD
-    // Guardamos un mensaje para mostrarlo en el login.
-    $_SESSION['error'] = "Acceso denegado. Debes iniciar sesión para ver esa página.";
-
-    // 4. REDIRECCIÓN FORZADA
-    // Enviamos al intruso de vuelta al Login.
-    // Nota: Asumimos que este archivo se usa en carpetas tipo views/admin/
-    header("Location: ../../views/auth/login.php");
-    
-    // 5. DETENER EJECUCIÓN (CRÍTICO)
-    // Sin el exit(), el código de abajo se seguiría ejecutando en segundo plano
-    // aunque el navegador cambie de página. ¡Es un hueco de seguridad grave!
+    header("Location: /zoo-system/views/auth/login.php");
     exit();
 }
-?>
 
 
 ================================================
 FILE: includes/footer.php
 ================================================
-        </main> 
-        <footer style="text-align: center; margin-top: 50px; padding: 20px; color: #777; font-size: 0.9em;">
-            <p>&copy; 2026 ZooManager - Proyecto Universitario PHP Nativo</p>
+            </main> 
+            <footer style="text-align: center; margin-top: 50px; padding: 20px; color: #777; font-size: 0.9em; border-top: 1px solid #eee;">
+            <div class="container">
+                <p>&copy; <?php echo date('Y'); ?> ZooManager - Proyecto Universitario PHP Nativo</p>
+                <small>Desarrollado con fines acadÃ©micos</small>
+            </div>
         </footer>
     </body>
 </html>
@@ -617,20 +688,79 @@ FILE: includes/footer.php
 ================================================
 FILE: includes/functions.php
 ================================================
-[Empty file]
+<?php
+/**
+ * ARCHIVO DE FUNCIONES GLOBALES
+ * AquÃ­ centralizamos la lÃ³gica repetitiva para que el sistema sea fÃ¡cil de mantener.
+ */
+
+// 1. LIMPIEZA DE ENTRADAS (Seguridad XSS)
+function limpiar($dato) {
+    // trim: elimina espacios al inicio y final
+    // htmlspecialchars: convierte caracteres especiales en entidades HTML
+    // (Ej: "<" se convierte en "&lt;"), evitando que ejecuten scripts maliciosos.
+    return htmlspecialchars(trim($dato), ENT_QUOTES, 'UTF-8');
+}
+
+// 2. FORMATEO DE FECHAS
+function formatearFecha($fecha) {
+    // Convierte "2026-01-17" en "17 de Enero, 2026" (o el formato que prefieras)
+    if (empty($fecha)) return "N/A";
+    return date('d/m/Y', strtotime($fecha));
+}
+
+// 3. GENERADOR DE ALERTAS (Consistencia de Mensajes)
+function mostrarAlertas() {
+    $salida = "";
+    
+    // Verificamos si hay mensajes de error en la sesiÃ³n
+    if (isset($_SESSION['error'])) {
+        $salida .= "<div class='alert alert-error'>" . $_SESSION['error'] . "</div>";
+        unset($_SESSION['error']); // Lo borramos para que no se repita
+    }
+    
+    // Verificamos si hay mensajes de Ã©xito
+    if (isset($_SESSION['success'])) {
+        $salida .= "<div class='alert alert-success'>" . $_SESSION['success'] . "</div>";
+        unset($_SESSION['success']);
+    }
+    
+    return $salida;
+}
+
+// 4. VERIFICADOR DE ROLES (Seguridad extra)
+
+// Comprueba si es Admin (Para borrar o gestionar usuarios)
+function esAdmin() {
+    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
+}
+
+// Comprueba si es Cuidador (Para historiales mÃ©dicos)
+function esCuidador() {
+    return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'cuidador';
+}
+
+// Comprueba si tiene CUALQUIERA de los dos (Para ver la lista de animales)
+function puedeVerAnimales() {
+    return isset($_SESSION['user_role']) && 
+        ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'cuidador');
+}
 
 
 ================================================
 FILE: includes/header.php
 ================================================
 <?php
-// 1. INICIAR SESIÓN
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// 2. DEFINIR RUTA BASE
-define('BASE_URL', 'http://localhost/zoo-system/');
+require_once 'functions.php';
+
+// Definimos la constante si no existe para evitar errores de re-definición
+if (!defined('BASE_URL')) {
+    define('BASE_URL', 'http://localhost/zoo-system/');
+}
 ?>
 
 <!DOCTYPE html>
@@ -638,34 +768,55 @@ define('BASE_URL', 'http://localhost/zoo-system/');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZooManager - Sistema de Gestión</title>
+    <title><?php echo $pageTitle ?? 'ZooManager'; ?> - Sistema de Gestión</title>
     
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
 </head>
 <body>
 
-    <nav class="main-nav">
-        <div class="container nav-container">
-            <a href="<?php echo BASE_URL; ?>index.php" class="logo">🦁 ZooSystem</a>
+    <nav class="navbar navbar-expand-sm bg-body-tertiary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="<?php echo BASE_URL; ?>index.php">🦁 ZooSystem</a>
 
-            <ul class="menu">
-                
-                <?php if (isset($_SESSION['user_id'])): ?>
-                    <li><span>Hola, <?php echo htmlspecialchars($_SESSION['user_name']); ?></span></li>
-                    <li><a href="<?php echo BASE_URL; ?>views/admin/animals.php">Animales</a></li>
-                    <li><a href="<?php echo BASE_URL; ?>views/admin/habitats.php">Hábitats</a></li>
-                    <li><a href="<?php echo BASE_URL; ?>actions/auth/logout.php" class="btn-logout">Salir</a></li>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+            </button>
 
-                <?php else: ?>
-                    <li><a href="<?php echo BASE_URL; ?>index.php">Inicio</a></li>
-                    <li><a href="<?php echo BASE_URL; ?>views/auth/login.php">Entrar</a></li>
-                    <li><a href="<?php echo BASE_URL; ?>views/auth/register.php" class="btn-register">Registrarse</a></li>
-                <?php endif; ?>
-                
-            </ul>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <li class="nav-item"><span class="nav-link text-dark"><?php echo htmlspecialchars($_SESSION['user_name']); ?> (<?php echo $_SESSION['user_role']; ?>)</span></li>
+                        <?php if (puedeVerAnimales()): ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="<?php echo BASE_URL; ?>views/admin/animals.php">Animales</a>
+                            </li>  
+                        <?php endif; ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo BASE_URL; ?>views/admin/habitats.php">Hábitats</a>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="<?php echo BASE_URL; ?>index.php">Inicio</a>
+                        </li>
+                    <?php endif; ?>
+                    
+                </ul>
+
+                <div class="d-flex">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <a href="<?php echo BASE_URL; ?>actions/auth/logout.php" class="btn btn-outline-danger">Salir</a>
+                    <?php else: ?>
+                        <a href="<?php echo BASE_URL; ?>views/auth/login.php" class="btn btn-outline-primary me-2">Entrar</a>
+                        <a href="<?php echo BASE_URL; ?>views/auth/register.php" class="btn btn-primary">Registrarse</a>
+                    <?php endif; ?>
+                </div>
+
+            </div>
         </div>
     </nav>
-    
     <main class="container">
 
 
@@ -733,7 +884,7 @@ try {
                     
                     <?php foreach ($habitats as $h): ?>
                         <option value="<?php echo $h['id']; ?>">
-                            <?php echo htmlspecialchars($h['nombre']); ?>
+                            <?php echo limpiar($h['nombre']); ?>
                         </option>
                     <?php endforeach; ?>
                     
@@ -778,19 +929,19 @@ try {
 
 <div class="auth-container">
     <div class="auth-card" style="max-width: 600px;">
-        <h2>Editar Animal: <?php echo htmlspecialchars($animal['nombre']); ?></h2>
+        <h2>Editar Animal: <?php echo limpiar($animal['nombre']); ?></h2>
         
         <form action="../../actions/animals/animal_update_action.php" method="POST" class="form-standard">
             <input type="hidden" name="id" value="<?php echo $animal['id']; ?>">
 
             <div class="form-group">
                 <label>Nombre:</label>
-                <input type="text" name="nombre" value="<?php echo htmlspecialchars($animal['nombre']); ?>" required>
+                <input type="text" name="nombre" value="<?php echo limpiar($animal['nombre']); ?>" required>
             </div>
 
             <div class="form-group">
                 <label>Especie:</label>
-                <input type="text" name="especie" value="<?php echo htmlspecialchars($animal['especie']); ?>" required>
+                <input type="text" name="especie" value="<?php echo limpiar($animal['especie']); ?>" required>
             </div>
 
             <div class="row" style="display:flex; gap:15px;">
@@ -809,7 +960,7 @@ try {
                 <select name="habitat_id" required>
                     <?php foreach ($habitats as $h): ?>
                         <option value="<?php echo $h['id']; ?>" <?php echo ($h['id'] == $animal['habitat_id']) ? 'selected' : ''; ?>>
-                            <?php echo htmlspecialchars($h['nombre']); ?>
+                            <?php echo limpiar($h['nombre']); ?>
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -827,67 +978,92 @@ try {
 ================================================
 FILE: views/admin/animals.php
 ================================================
-Error reading file with 'cp1252': 'charmap' codec can't decode byte 0x90 in position 1109: character maps to <undefined>
+Error reading file with 'cp1252': 'charmap' codec can't decode byte 0x90 in position 1347: character maps to <undefined>
+
+
+================================================
+FILE: views/admin/habitat_create.php
+================================================
+[Binary file]
+
+
+================================================
+FILE: views/admin/habitats.php
+================================================
+Error reading file with 'cp1252': 'charmap' codec can't decode byte 0x8f in position 4525: character maps to <undefined>
 
 
 ================================================
 FILE: views/auth/login.php
 ================================================
-Error reading file with 'cp1252': 'charmap' codec can't decode byte 0x81 in position 1763: character maps to <undefined>
+<?php require '../../includes/header.php'; ?>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h2>Iniciar SesiÃ³n</h2>
+        <p>Ingresa tus credenciales para acceder.</p>
+
+        <?php echo mostrarAlertas(); ?>
+
+        <form action="<?php echo BASE_URL; ?>actions/auth/login_action.php" method="POST" class="form-standard">
+            
+            <div class="form-group">
+                <label for="email">Correo ElectrÃ³nico:</label>
+                <input type="email" name="email" id="email" required autofocus placeholder="tu@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="password">ContraseÃ±a:</label>
+                <input type="password" name="password" id="password" required placeholder="Tu contraseÃ±a">
+            </div>
+
+            <button type="submit" class="btn-submit">Ingresar al Sistema</button>
+        </form>
+
+        <p class="auth-link">Â¿No tienes cuenta? <a href="register.php">RegÃ­strate aquÃ­</a></p>
+    </div>
+</div>
+<?php require '../../includes/footer.php'; ?>
 
 
 ================================================
 FILE: views/auth/register.php
 ================================================
-<?php
-// 1. Incluimos el header para mantener el menÃº y el diseÃ±o 
-// Usamos ../../ para subir dos niveles y encontrar la carpeta includes
-require '../../includes/header.php';
-?>
+<?php require '../../includes/header.php'; ?>
 
 <div class="auth-container">
     <div class="auth-card">
         <h2>Registro de Personal</h2>
         <p>Crea una cuenta para acceder al sistema ZooManager.</p>
 
-        <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert alert-error">
-                <?php 
-                    echo $_SESSION['error']; 
-                    unset($_SESSION['error']); // Borramos el error para que no aparezca de nuevo al refrescar
-                ?>
-            </div>
-        <?php endif; ?>
-
-        <?php if (isset($_SESSION['success'])): ?>
-            <div class="alert alert-success">
-                <?php 
-                    echo $_SESSION['success']; 
-                    unset($_SESSION['success']); 
-                ?>
-            </div>
-        <?php endif; ?>
+        <?php echo mostrarAlertas(); ?>
 
         <form action="<?php echo BASE_URL; ?>actions/auth/register_action.php" method="POST" class="form-standard">
             
             <div class="form-group">
                 <label for="nombre">Nombre Completo:</label>
-                <input type="text" name="nombre_completo" id="nombre" required placeholder="Ej: Juan PÃ©rez">
+                <input type="text" name="nombre_completo" id="nombre" 
+                    required pattern="[A-Za-zÁéíóúÁÉÍÓÚñÑ\s]+" 
+                    title="Solo se permiten letras y espacios" 
+                    placeholder="Ej: Juan Pérez">
             </div>
 
             <div class="form-group">
-                <label for="email">Correo ElectrÃ³nico:</label>
-                <input type="email" name="email" id="email" required placeholder="usuario@zoolÃ³gico.com">
+                <label for="email">Correo Electrónico:</label>
+                <input type="email" name="email" id="email" required placeholder="usuario@zoo.com">
             </div>
 
             <div class="form-group">
-                <label for="password">ContraseÃ±a:</label>
-                <input type="password" name="password" id="password" required minlength="6" placeholder="MÃ­nimo 6 caracteres">
+                <label for="password">Contraseña:</label>
+                <input type="password" name="password" id="password" 
+                    required minlength="8" 
+                    placeholder="Mínimo 8 caracteres">
             </div>
 
             <div class="form-group">
                 <label for="rol">Rol Asignado:</label>
                 <select name="rol" id="rol" required>
+                    <option value="" disabled selected>-- Selecciona un Rol --</option>
                     <option value="cuidador">Cuidador (Acceso limitado)</option>
                     <option value="admin">Administrador (Acceso total)</option>
                 </select>
@@ -896,12 +1072,8 @@ require '../../includes/header.php';
             <button type="submit" class="btn-submit">Registrar Personal</button>
         </form>
 
-        <p class="auth-link">Â¿Ya tienes una cuenta? <a href="login.php">Inicia sesiÃ³n aquÃ­</a></p>
+        <p class="auth-link">¿Ya tienes una cuenta? <a href="login.php">Inicia sesión aquí</a></p>
     </div>
 </div>
-
-<?php
-// 3. Incluimos el footer para cerrar las etiquetas HTML
-require '../../includes/footer.php';
-?>
+<?php require '../../includes/footer.php'; ?>
 
