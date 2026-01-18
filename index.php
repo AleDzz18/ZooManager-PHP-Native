@@ -8,17 +8,7 @@ require 'includes/header.php';
 
 <div class="container" style="margin-top: 40px;">
     
-    <?php if (isset($_SESSION['success'])): ?>
-        <div class="alert alert-success" style="text-align:center;">
-            <?php echo $_SESSION['success']; unset($_SESSION['success']); ?>
-        </div>
-    <?php endif; ?>
-
-    <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-error" style="text-align:center;">
-            <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
-        </div>
-    <?php endif; ?>
+    <?php echo mostrarAlertas(); ?>
 
 
     <?php if (isset($_SESSION['user_id'])): ?>
