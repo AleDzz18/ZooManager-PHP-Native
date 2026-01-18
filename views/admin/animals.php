@@ -11,6 +11,14 @@ require '../../includes/auth_check.php';
 
 // 2. INTERFAZ Y CONEXIÓN
 require '../../includes/header.php';
+
+// Si NO puede ver animales, lo sacamos de aquí
+if (!puedeVerAnimales()) {
+    $_SESSION['error'] = "No tienes permisos para acceder a la gestión de animales.";
+    header("Location: " . BASE_URL . "index.php");
+    exit();
+}
+
 require '../../config/db.php';
 
 // 3. OBTENER DATOS (Lógica de Lectura)
@@ -33,54 +41,52 @@ try {
 <div class="container">
     <div class="admin-header">
         <h1>🐾 Gestión de Animales</h1>
-        <a href="animal_create.php" class="btn-register">
-            + Nuevo Animal
-        </a>
+        <?php if (esAdmin()): ?>
+            <a href="animal_create.php" class="btn-register">
+                + Nuevo Animal
+            </a>
+        <?php endif; ?>
     </div>
 
-    <?php if (isset($error)): ?>
-        <div class="alert alert-error"><?php echo $error; ?></div>
-    <?php endif; ?>
+    <?php echo mostrarAlertas(); ?>
 
     <div class="table-responsive">
         <table class="table-standard">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
+                    <th style="width: 50px;">ID</th> <th>Nombre</th>
                     <th>Especie</th>
                     <th>Edad</th>
                     <th>Hábitat</th>
-                    <th>Ingreso</th>
-                    <th>Acciones</th>
+                    <th>Llegada</th>
+                    <th style="text-align: center;">Acciones</th>
                 </tr>
             </thead>
             <tbody>
-                <?php if (count($animales) > 0): ?>
-                    <?php foreach ($animales as $animal): ?>
-                        <tr>
-                            <td><?php echo $animal['id']; ?></td>
-                            <td><strong><?php echo htmlspecialchars($animal['nombre']); ?></strong></td>
-                            <td><?php echo htmlspecialchars($animal['especie']); ?></td>
-                            <td><?php echo $animal['edad']; ?> años</td>
-                            
-                            <td>
-                                <?php echo $animal['habitat_nombre'] ? htmlspecialchars($animal['habitat_nombre']) : '<span class="text-muted">Sin Asignar</span>'; ?>
-                            </td>
-                            
-                            <td><?php echo date('d/m/Y', strtotime($animal['fecha_llegada'])); ?></td>
-                            
-                            <td class="actions-cell">
-                                <a href="animal_edit.php?id=<?php echo $animal['id']; ?>" class="btn-edit">✏️ Editar</a>
-                                <a href="../../actions/animals/animal_delete.php?id=<?php echo $animal['id']; ?>" class="btn-delete" onclick="return confirm('¿Estás seguro de eliminar a este animal?');">🗑️ Borrar</a>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else: ?>
+                <?php foreach ($animales as $animal): ?>
                     <tr>
-                        <td colspan="7" style="text-align:center;">No hay animales registrados aún.</td>
+                        <td class="text-muted">#<?php echo $animal['id']; ?></td> 
+                        <td><strong><?php echo limpiar($animal['nombre']); ?></strong></td>
+                        <td><?php echo limpiar($animal['especie']); ?></td>
+                        <td><?php echo $animal['edad']; ?> años</td>
+                        <td>
+                            <span class="badge-habitat">
+                                <?php echo $animal['habitat_nombre'] ?? 'Sin asignar'; ?>
+                            </span>
+                        </td>
+                        <td><?php echo formatearFecha($animal['fecha_llegada']); ?></td>
+                        <?php if (esAdmin()): ?>
+                            <td class="actions-cell">
+                                <a href="animal_edit.php?id=<?php echo $animal['id']; ?>" class="btn-edit" title="Editar">✏️</a>
+                                <a href="../../actions/animals/animal_delete.php?id=<?php echo $animal['id']; ?>" 
+                                    class="btn-delete" 
+                                    onclick="return confirm('¿Estás seguro de eliminar al animal #<?php echo $animal['id']; ?>?');">
+                                    🗑️
+                                </a>
+                            </td>
+                        <?php endif; ?>
                     </tr>
-                <?php endif; ?>
+                <?php endforeach; ?>
             </tbody>
         </table>
     </div>

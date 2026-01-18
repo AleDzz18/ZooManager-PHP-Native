@@ -3,6 +3,10 @@ Directory structure:
     ├── README.md
     ├── index.php
     ├── actions/
+    │   ├── animals/
+    │   │   ├── animal_create_action.php
+    │   │   ├── animal_delete.php
+    │   │   └── animal_update_action.php
     │   └── auth/
     │       ├── login_action.php
     │       ├── logout.php
@@ -16,6 +20,10 @@ Directory structure:
     │   ├── functions.php
     │   └── header.php
     └── views/
+        ├── admin/
+        │   ├── animal_create.php
+        │   ├── animal_edit.php
+        │   └── animals.php
         └── auth/
             ├── login.php
             └── register.php
@@ -84,6 +92,131 @@ require 'includes/header.php'; // Carga el menú y el CSS
 <?php 
 require 'includes/footer.php'; // Carga el pie de página
 ?>
+
+
+================================================
+FILE: actions/animals/animal_create_action.php
+================================================
+<?php
+session_start();
+require_once '../../config/db.php';
+
+// 1. VERIFICAR MÉTODO POST
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // 2. CAPTURAR DATOS
+    $nombre = trim($_POST['nombre']);
+    $especie = trim($_POST['especie']);
+    $edad = $_POST['edad'];
+    $fecha = $_POST['fecha_llegada'];
+    $habitat_id = $_POST['habitat_id'];
+
+    // 3. VALIDACIÓN BÁSICA
+    if (empty($nombre) || empty($especie) || empty($habitat_id)) {
+        $_SESSION['error'] = "Por favor completa todos los campos obligatorios.";
+        header("Location: ../../views/admin/animal_create.php");
+        exit();
+    }
+
+    try {
+        // 4. INSERTAR EN BASE DE DATOS
+        // Fíjate que usamos "?" para evitar inyección SQL.
+        $sql = "INSERT INTO animals (nombre, especie, edad, fecha_llegada, habitat_id) 
+                VALUES (?, ?, ?, ?, ?)";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$nombre, $especie, $edad, $fecha, $habitat_id]);
+
+        // 5. REDIRECCIONAR CON ÉXITO
+        // No creamos mensaje de éxito en sesión todavía para no complicar, 
+        // pero volvemos a la lista para ver el nuevo animal.
+        header("Location: ../../views/admin/animals.php");
+        exit();
+
+    } catch (PDOException $e) {
+        // Manejo de error técnico
+        $_SESSION['error'] = "Error al guardar: " . $e->getMessage();
+        header("Location: ../../views/admin/animal_create.php");
+        exit();
+    }
+
+} else {
+    // Si intentan entrar directo por URL
+    header("Location: ../../views/admin/animals.php");
+    exit();
+}
+
+
+================================================
+FILE: actions/animals/animal_delete.php
+================================================
+<?php
+/*
+    ---------------------------------------------------
+    LÃ“GICA DE ELIMINACIÃ“N (DELETE)
+    ---------------------------------------------------
+*/
+session_start();
+require_once '../../config/db.php';
+require_once '../../includes/auth_check.php'; // Solo usuarios logueados borran
+
+// 1. OBTENER EL ID POR URL
+// El ID viene de: animal_delete.php?id=5
+$id = isset($_GET['id']) ? $_GET['id'] : null;
+
+if ($id) {
+    try {
+        // 2. PREPARAR LA ELIMINACIÃ“N
+        $sql = "DELETE FROM animals WHERE id = ?";
+        $stmt = $pdo->prepare($sql);
+        
+        // 3. EJECUTAR
+        if ($stmt->execute([$id])) {
+            $_SESSION['success'] = "Animal eliminado correctamente.";
+        } else {
+            $_SESSION['error'] = "No se pudo eliminar el registro.";
+        }
+
+    } catch (PDOException $e) {
+        $_SESSION['error'] = "Error de base de datos: " . $e->getMessage();
+    }
+}
+
+// 4. REDIRECCIONAR DE VUELTA A LA LISTA
+header("Location: ../../views/admin/animals.php");
+exit();
+?>
+
+
+================================================
+FILE: actions/animals/animal_update_action.php
+================================================
+<?php
+session_start();
+require_once '../../config/db.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = $_POST['id'];
+    $nombre = trim($_POST['nombre']);
+    $especie = trim($_POST['especie']);
+    $edad = $_POST['edad'];
+    $fecha = $_POST['fecha_llegada'];
+    $habitat_id = $_POST['habitat_id'];
+
+    try {
+        // Usamos la sentencia UPDATE con WHERE id = ?
+        $sql = "UPDATE animals SET nombre = ?, especie = ?, edad = ?, fecha_llegada = ?, habitat_id = ? WHERE id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$nombre, $especie, $edad, $fecha, $habitat_id, $id]);
+
+        $_SESSION['success'] = "Animal actualizado correctamente.";
+        header("Location: ../../views/admin/animals.php");
+        exit();
+
+    } catch (PDOException $e) {
+        die("Error al actualizar: " . $e->getMessage());
+    }
+}
 
 
 ================================================
@@ -437,6 +570,8 @@ th {
 }
 
 
+
+
 ================================================
 FILE: includes/auth_check.php
 ================================================
@@ -532,6 +667,167 @@ define('BASE_URL', 'http://localhost/zoo-system/');
     </nav>
     
     <main class="container">
+
+
+================================================
+FILE: views/admin/animal_create.php
+================================================
+<?php
+// 1. EL GUARDIA DE SEGURIDAD
+require '../../includes/auth_check.php';
+require '../../includes/header.php';
+require '../../config/db.php';
+
+// 2. OBTENER LOS HÁBITATS PARA EL SELECT
+// Necesitamos llenar el menú desplegable con opciones reales de la BD.
+try {
+    // IMPORTANTE: Tu tabla usa 'nombre', no necesitamos cambiar esta consulta
+    $stmt = $pdo->query("SELECT id, nombre FROM habitats");
+    $habitats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $error = "Error al cargar hábitats.";
+}
+?>
+
+<div class="auth-container"> <div class="auth-card" style="max-width: 600px;"> <div class="admin-header">
+            <h2>Registrar Nuevo Animal</h2>
+            <a href="animals.php" class="btn-delete" style="background:#7f8c8d;">Cancelar</a>
+        </div>
+
+        <p>Completa los datos del nuevo integrante del zoológico.</p>
+
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-error">
+                <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
+            </div>
+        <?php endif; ?>
+
+        <form action="../../actions/animals/animal_create_action.php" method="POST" class="form-standard">
+            
+            <div class="form-group">
+                <label>Nombre del Animal:</label>
+                <input type="text" name="nombre" required placeholder="Ej: Simba">
+            </div>
+
+            <div class="form-group">
+                <label>Especie:</label>
+                <input type="text" name="especie" required placeholder="Ej: León Africano">
+            </div>
+
+            <div class="row" style="display:flex; gap:15px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Edad (Años):</label>
+                    <input type="number" name="edad" required min="0">
+                </div>
+                
+                <div class="form-group" style="flex:1;">
+                    <label>Fecha de Llegada:</label>
+                    <input type="date" name="fecha_llegada" required value="<?php echo date('Y-m-d'); ?>">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Asignar Hábitat:</label>
+                <select name="habitat_id" required>
+                    <option value="">-- Selecciona un hábitat --</option>
+                    
+                    <?php foreach ($habitats as $h): ?>
+                        <option value="<?php echo $h['id']; ?>">
+                            <?php echo htmlspecialchars($h['nombre']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                    
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit">Guardar Animal</button>
+        </form>
+    </div>
+</div>
+
+<?php require '../../includes/footer.php'; ?>
+
+
+================================================
+FILE: views/admin/animal_edit.php
+================================================
+<?php
+require '../../includes/auth_check.php';
+require '../../includes/header.php';
+require '../../config/db.php';
+
+// 1. OBTENER EL ANIMAL A EDITAR
+$id = $_GET['id'] ?? null;
+if (!$id) { header("Location: animals.php"); exit(); }
+
+try {
+    // Traemos los datos del animal
+    $stmt = $pdo->prepare("SELECT * FROM animals WHERE id = ?");
+    $stmt->execute([$id]);
+    $animal = $stmt->fetch();
+
+    // Traemos los hÃ¡bitats para el select
+    $h_stmt = $pdo->query("SELECT id, nombre FROM habitats");
+    $habitats = $h_stmt->fetchAll();
+
+    if (!$animal) { die("Animal no encontrado."); }
+} catch (PDOException $e) {
+    die("Error: " . $e->getMessage());
+}
+?>
+
+<div class="auth-container">
+    <div class="auth-card" style="max-width: 600px;">
+        <h2>Editar Animal: <?php echo htmlspecialchars($animal['nombre']); ?></h2>
+        
+        <form action="../../actions/animals/animal_update_action.php" method="POST" class="form-standard">
+            <input type="hidden" name="id" value="<?php echo $animal['id']; ?>">
+
+            <div class="form-group">
+                <label>Nombre:</label>
+                <input type="text" name="nombre" value="<?php echo htmlspecialchars($animal['nombre']); ?>" required>
+            </div>
+
+            <div class="form-group">
+                <label>Especie:</label>
+                <input type="text" name="especie" value="<?php echo htmlspecialchars($animal['especie']); ?>" required>
+            </div>
+
+            <div class="row" style="display:flex; gap:15px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Edad:</label>
+                    <input type="number" name="edad" value="<?php echo $animal['edad']; ?>" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Fecha Llegada:</label>
+                    <input type="date" name="fecha_llegada" value="<?php echo $animal['fecha_llegada']; ?>" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>HÃ¡bitat:</label>
+                <select name="habitat_id" required>
+                    <?php foreach ($habitats as $h): ?>
+                        <option value="<?php echo $h['id']; ?>" <?php echo ($h['id'] == $animal['habitat_id']) ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($h['nombre']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <button type="submit" class="btn-submit" style="background:#f39c12;">Actualizar Datos</button>
+            <a href="animals.php" style="display:block; text-align:center; margin-top:10px; color:#7f8c8d;">Volver atrÃ¡s</a>
+        </form>
+    </div>
+</div>
+
+<?php require '../../includes/footer.php'; ?>
+
+
+================================================
+FILE: views/admin/animals.php
+================================================
+Error reading file with 'cp1252': 'charmap' codec can't decode byte 0x90 in position 1109: character maps to <undefined>
 
 
 ================================================
