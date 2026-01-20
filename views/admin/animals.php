@@ -59,7 +59,7 @@ try {
                     <th>Edad</th>
                     <th>Hábitat</th>
                     <th>Llegada</th>
-                    <?php if (esAdmin()): ?>
+                    <?php if (puedeVerAnimales()): ?>
                         <th style="text-align: center;">Acciones</th>
                     <?php endif; ?>
                 </tr>
@@ -77,16 +77,24 @@ try {
                             </span>
                         </td>
                         <td><?php echo formatearFecha($animal['fecha_llegada']); ?></td>
-                        <?php if (esAdmin()): ?>
                             <td class="actions-cell">
-                                <a href="animal_edit.php?id=<?php echo $animal['id']; ?>" class="btn-edit" title="Editar">✏️</a>
-                                <a href="../../actions/animals/animal_delete.php?id=<?php echo $animal['id']; ?>" 
-                                    class="btn-delete" 
-                                    onclick="return confirm('¿Estás seguro de eliminar al animal #<?php echo $animal['id']; ?>?');">
-                                    🗑️
-                                </a>
+                                <?php if (puedeVerAnimales()): ?>
+                                    <a href="../medical/medical_history.php?id=<?php echo $animal['id']; ?>" 
+                                        class="btn-edit" 
+                                        style="background-color: #3498db;" 
+                                        title="Ver Historial Médico">
+                                        📋
+                                    </a>
+                                <?php endif; ?>
+                                <?php if (esAdmin()): ?>
+                                    <a href="animal_edit.php?id=<?php echo $animal['id']; ?>" class="btn-edit" title="Editar">✏️</a>
+                                    <a href="../../actions/animals/animal_delete.php?id=<?php echo $animal['id']; ?>" 
+                                        class="btn-delete" 
+                                        onclick="return confirm('¿Estás seguro de eliminar al animal #<?php echo $animal['id']; ?>?');">
+                                        🗑️
+                                    </a>
+                                <?php endif; ?>
                             </td>
-                        <?php endif; ?>
                     </tr>
                 <?php endforeach; ?>
             </tbody>

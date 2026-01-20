@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../config/db.php';
+require_once '../../includes/auth_check.php'; // Solo usuarios logueados editan
 require_once '../../includes/functions.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -49,4 +50,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header("Location: ../../views/admin/animal_edit.php?id=" . $id);
         exit();
     }
+} else {
+    // Si no es POST, redirigimos al listado de animales
+    header("Location: ../../views/admin/animals.php");
+    exit();
 }

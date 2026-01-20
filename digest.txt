@@ -12,7 +12,9 @@ Directory structure:
     │   │   ├── logout.php
     │   │   └── register_action.php
     │   └── habitats/
-    │       └── habitat_create_action.php
+    │       ├── habitat_create_action.php
+    │       ├── habitat_delete.php
+    │       └── habitat_update_action.php
     ├── assets/
     │   └── css/
     │       └── style.css
@@ -27,6 +29,7 @@ Directory structure:
         │   ├── animal_edit.php
         │   ├── animals.php
         │   ├── habitat_create.php
+        │   ├── habitat_edit.php
         │   └── habitats.php
         └── auth/
             ├── login.php
@@ -474,6 +477,111 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (PDOException $e) {
         $_SESSION['error'] = "Error en base de datos: " . $e->getMessage();
         header("Location: ../../views/admin/habitat_create.php");
+        exit();
+    }
+}
+
+
+================================================
+FILE: actions/habitats/habitat_delete.php
+================================================
+<?php
+session_start();
+require_once '../../config/db.php';
+require_once '../../includes/auth_check.php';
+require_once '../../includes/functions.php';
+
+// 1. VERIFICAR PERMISOS DE ADMINISTRADOR
+// Solo el admin puede destruir hÃ¡bitats.
+if (!esAdmin()) {
+    $_SESSION['error'] = "Acceso denegado. Solo administradores pueden eliminar hÃ¡bitats.";
+    header("Location: ../../views/admin/habitats.php");
+    exit();
+}
+
+$id = isset($_GET['id']) ? $_GET['id'] : null;
+
+if ($id) {
+    try {
+        // 2. VERIFICAR SI HAY ANIMALES DENTRO (OPCIONAL PERO RECOMENDADO)
+        // Aunque la BD tenga "SET NULL", es bueno avisar o limpiar.
+        // En este caso, confiamos en la restricciÃ³n de la BD, pero ejecutamos el delete.
+
+        $sql = "DELETE FROM habitats WHERE id = ?";
+        $stmt = $pdo->prepare($sql);
+        
+        if ($stmt->execute([$id])) {
+            $_SESSION['success'] = "HÃ¡bitat eliminado. Los animales asociados (si habÃ­a) ahora estÃ¡n sin asignar.";
+        } else {
+            $_SESSION['error'] = "No se pudo eliminar el hÃ¡bitat.";
+        }
+
+    } catch (PDOException $e) {
+        // Captura si hay un error de llave forÃ¡nea u otro problema tÃ©cnico
+        $_SESSION['error'] = "Error de base de datos: " . $e->getMessage();
+    }
+}
+
+// 3. VOLVER A LA LISTA
+header("Location: ../../views/admin/habitats.php");
+exit();
+?>
+
+
+================================================
+FILE: actions/habitats/habitat_update_action.php
+================================================
+<?php
+session_start();
+require_once '../../config/db.php';
+require_once '../../includes/functions.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // 1. CAPTURAR DATOS
+    $id = $_POST['id'];
+    $nombre = limpiar($_POST['nombre']);
+    $clima = limpiar($_POST['clima']);
+    $capacidad_nueva = (int) $_POST['capacidad'];
+    $descripcion = limpiar($_POST['descripcion']);
+
+    // 2. VALIDAR QUE NO ESTÉN VACÍOS
+    if (empty($nombre) || empty($clima) || $capacidad_nueva < 1) {
+        $_SESSION['error'] = "Datos inválidos. La capacidad debe ser mayor a 0.";
+        header("Location: ../../views/admin/habitat_edit.php?id=" . $id);
+        exit();
+    }
+
+    try {
+        // 3. VALIDACIÓN LÓGICA DE NEGOCIO (INTEGRIDAD)
+        // No podemos reducir la capacidad a un número menor a la cantidad de animales que ya viven ahí.
+        
+        // A) Contamos cuántos animales hay actualmente en este hábitat
+        $stmt_count = $pdo->prepare("SELECT COUNT(*) FROM animals WHERE habitat_id = ?");
+        $stmt_count->execute([$id]);
+        $ocupacion_actual = $stmt_count->fetchColumn();
+
+        // B) Si intentas bajar la capacidad a 5, pero hay 8 animales, damos error.
+        if ($capacidad_nueva < $ocupacion_actual) {
+            $_SESSION['error'] = "No puedes reducir la capacidad a $capacidad_nueva. Actualmente hay $ocupacion_actual animales asignados.";
+            header("Location: ../../views/admin/habitat_edit.php?id=" . $id);
+            exit();
+        }
+
+        // 4. PREPARAR LA ACTUALIZACIÓN
+        $sql = "UPDATE habitats SET nombre = ?, clima = ?, capacidad = ?, descripcion = ? WHERE id = ?";
+        $stmt = $pdo->prepare($sql);
+        
+        // 5. EJECUTAR
+        if ($stmt->execute([$nombre, $clima, $capacidad_nueva, $descripcion, $id])) {
+            $_SESSION['success'] = "Hábitat actualizado correctamente.";
+            header("Location: ../../views/admin/habitats.php");
+            exit();
+        }
+
+    } catch (PDOException $e) {
+        $_SESSION['error'] = "Error al actualizar: " . $e->getMessage();
+        header("Location: ../../views/admin/habitat_edit.php?id=" . $id);
         exit();
     }
 }
@@ -988,9 +1096,95 @@ FILE: views/admin/habitat_create.php
 
 
 ================================================
+FILE: views/admin/habitat_edit.php
+================================================
+<?php
+// 1. SEGURIDAD Y CONEXIÃ“N
+require '../../includes/auth_check.php';
+require '../../includes/header.php';
+require '../../config/db.php';
+
+// 2. OBTENER EL ID Y VALIDAR
+$id = $_GET['id'] ?? null;
+
+if (!$id) {
+    $_SESSION['error'] = "ID de hÃ¡bitat no especificado.";
+    header("Location: habitats.php");
+    exit();
+}
+
+try {
+    // 3. BUSCAR DATOS ACTUALES
+    $stmt = $pdo->prepare("SELECT * FROM habitats WHERE id = ?");
+    $stmt->execute([$id]);
+    $habitat = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$habitat) {
+        $_SESSION['error'] = "El hÃ¡bitat no existe.";
+        header("Location: habitats.php");
+        exit();
+    }
+
+} catch (PDOException $e) {
+    die("Error al cargar datos: " . $e->getMessage());
+}
+?>
+
+<div class="auth-container">
+    <div class="auth-card" style="max-width: 600px;">
+        <div class="admin-header">
+            <h2>Editar HÃ¡bitat</h2>
+            <a href="habitats.php" class="btn-delete" style="background:#7f8c8d;">Cancelar</a>
+        </div>
+
+        <?php echo mostrarAlertas(); ?>
+
+        <form action="../../actions/habitats/habitat_update_action.php" method="POST" class="form-standard">
+            <input type="hidden" name="id" value="<?php echo $habitat['id']; ?>">
+
+            <div class="form-group">
+                <label>Nombre del HÃ¡bitat:</label>
+                <input type="text" name="nombre" value="<?php echo limpiar($habitat['nombre']); ?>" required>
+            </div>
+
+            <div class="row" style="display:flex; gap:15px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Tipo de Clima:</label>
+                    <select name="clima" required>
+                        <?php 
+                        $climas = ["Selva", "Desierto", "AcuÃ¡tico", "Polar", "Aviario", "Sabana"];
+                        foreach ($climas as $c): 
+                        ?>
+                            <option value="<?php echo $c; ?>" <?php echo ($habitat['clima'] == $c) ? 'selected' : ''; ?>>
+                                <?php echo $c; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group" style="flex:1;">
+                    <label>Capacidad MÃ¡xima:</label>
+                    <input type="number" name="capacidad" value="<?php echo $habitat['capacidad']; ?>" required min="1">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>DescripciÃ³n:</label>
+                <textarea name="descripcion" rows="3"><?php echo limpiar($habitat['descripcion']); ?></textarea>
+            </div>
+
+            <button type="submit" class="btn-submit" style="background:#f39c12;">Guardar Cambios</button>
+        </form>
+    </div>
+</div>
+
+<?php require '../../includes/footer.php'; ?>
+
+
+================================================
 FILE: views/admin/habitats.php
 ================================================
-Error reading file with 'cp1252': 'charmap' codec can't decode byte 0x8f in position 4525: character maps to <undefined>
+Error reading file with 'cp1252': 'charmap' codec can't decode byte 0x8f in position 4743: character maps to <undefined>
 
 
 ================================================
