@@ -59,7 +59,9 @@ try {
                     <th>Edad</th>
                     <th>Hábitat</th>
                     <th>Llegada</th>
-                    <th style="text-align: center;">Acciones</th>
+                    <?php if (esAdmin()): ?>
+                        <th style="text-align: center;">Acciones</th>
+                    <?php endif; ?>
                 </tr>
             </thead>
             <tbody>

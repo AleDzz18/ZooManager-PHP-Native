@@ -25,9 +25,11 @@ try {
 <div class="container">
     <div class="admin-header">
         <h1>🌿 Gestión de Hábitats</h1>
-        <a href="habitat_create.php" class="btn-register">
-            + Nuevo Hábitat
-        </a>
+        <?php if (esAdmin()): ?>
+            <a href="habitat_create.php" class="btn-register">
+                + Nuevo Hábitat
+            </a>
+        <?php endif; ?>
     </div>
 
     <?php echo mostrarAlertas(); ?>
@@ -41,7 +43,9 @@ try {
                     <th>Descripción</th>
                     <th>Capacidad</th>
                     <th>Ocupación</th> <th>Estado</th>
-                    <th>Acciones</th>
+                    <?php if (esAdmin()): ?>
+                        <th>Acciones</th>
+                    <?php endif; ?>
                 </tr>
             </thead>
             <tbody>
@@ -89,16 +93,15 @@ try {
                                     <span class="badge-success">✅ Disponible</span>
                                 <?php endif; ?>
                             </td>
-
-                            <td class="actions-cell">
-                                <a href="habitat_edit.php?id=<?php echo $h['id']; ?>" class="btn-edit">✏️</a>
-                                
-                                <?php if (esAdmin()): ?>
+                            <?php if (esAdmin()): ?>
+                                <td class="actions-cell">
+                                    <a href="habitat_edit.php?id=<?php echo $h['id']; ?>" class="btn-edit">✏️</a>
                                     <a href="../../actions/habitats/habitat_delete.php?id=<?php echo $h['id']; ?>" 
                                         class="btn-delete" 
                                         onclick="return confirm('¿Seguro? Si borras el hábitat, los animales quedarán sin casa.');">🗑️</a>
-                                <?php endif; ?>
-                            </td>
+                                </td>
+                            <?php endif; ?>
+
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
