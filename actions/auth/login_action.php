@@ -39,6 +39,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // --- ¡LOGIN EXITOSO! ---
 
+            // =================================================================
+            // ACTUALIZAR ÚLTIMO ACCESO
+            // =================================================================
+            try {
+                $sql_update = "UPDATE users SET ultimo_acceso = NOW() WHERE id = ?";
+                $stmt_update = $pdo->prepare($sql_update);
+                $stmt_update->execute([$usuario['id']]);
+            } catch (PDOException $e) {
+                // Si falla actualizar la fecha, continuamos sin interrumpir el login
+            }
+
             // 8. GUARDAR DATOS EN LA SESIÓN
             // Estas variables estarán disponibles en TODAS las páginas (header.php las usa).
             $_SESSION['user_id'] = $usuario['id'];

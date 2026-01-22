@@ -2,8 +2,8 @@
 // 1. Incluir Configuración y Header
 require 'includes/header.php'; 
 
-// 2. VALIDACIÓN DE MENSAJES FLASH (Feedback al usuario)
-// Si viene redireccionado de otra página con un mensaje (ej: Logout exitoso), lo mostramos aquí.
+// 2. Conexión a la Base de Datos
+require_once 'config/db.php';
 ?>
 
 <div class="container" style="margin-top: 40px;">
@@ -16,6 +16,20 @@ require 'includes/header.php';
             <h1>👋 Hola, <?php echo limpiar($_SESSION['user_name']); ?></h1>
             <p>Bienvenido al Panel de Control de ZooManager.</p>
             <p>Tu rol actual es: <strong><?php echo ucfirst($_SESSION['user_role'] ?? 'Usuario'); ?></strong></p>
+
+            <?php
+            // Consultamos la fecha fresca de la base de datos
+            $stmt = $pdo->prepare("SELECT ultimo_acceso FROM users WHERE id = ?");
+            $stmt->execute([$_SESSION['user_id']]);
+            $fecha_acceso = $stmt->fetchColumn();
+            ?>
+
+            <?php if ($fecha_acceso): ?>
+                <p style="font-size: 0.9em; color: #666; margin-top: 5px;">
+                    🕒 Último acceso registrado: 
+                    <strong><?php echo date('d/m/Y h:i A', strtotime($fecha_acceso)); ?></strong>
+                </p>
+            <?php endif; ?>
         </div>
 
         <div class="dashboard-grid" style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; margin-top: 30px;">
