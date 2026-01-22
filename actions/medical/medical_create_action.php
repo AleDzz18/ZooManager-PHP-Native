@@ -12,6 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $descripcion = limpiar($_POST['descripcion']);
     $diagnostico = limpiar($_POST['diagnostico']);
     $tratamiento = limpiar($_POST['tratamiento']);
+    $severidad = $_POST['severidad'];
 
     // 2. VALIDAR
     if (empty($animal_id) || empty($descripcion) || empty($fecha)) {
@@ -23,12 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // 3. INSERTAR EN LA BASE DE DATOS
         // Usamos la tabla medical_records que ya definiste en el SQL
-        $sql = "INSERT INTO medical_records (animal_id, fecha, descripcion, diagnostico, tratamiento) 
-                VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO medical_records (animal_id, fecha, descripcion, diagnostico, tratamiento, severidad) 
+                VALUES (?, ?, ?, ?, ?, ?)";
         
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$animal_id, $fecha, $descripcion, $diagnostico, $tratamiento]);
-
+        $stmt->execute([$animal_id, $fecha, $descripcion, $diagnostico, $tratamiento, $severidad]);
         // 4. ÉXITO
         $_SESSION['success'] = "Registro médico agregado correctamente.";
         

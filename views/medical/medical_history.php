@@ -59,6 +59,10 @@ try {
                         <th>Tipo/Descripción</th>
                         <th>Diagnóstico</th>
                         <th>Tratamiento Recetado</th>
+                        <th>Severidad</th>
+                        <?php if (puedeVerAnimales()): ?>
+                            <th style="text-align: center;">Acciones</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,6 +72,18 @@ try {
                             <td><?php echo limpiar($record['descripcion']); ?></td>
                             <td><?php echo !empty($record['diagnostico']) ? limpiar($record['diagnostico']) : '<span style="color:#aaa;">-</span>'; ?></td>
                             <td><?php echo !empty($record['tratamiento']) ? limpiar($record['tratamiento']) : '<span style="color:#aaa;">-</span>'; ?></td>
+                            <td><?php echo limpiar($record['severidad']); ?></td>
+                            <?php if (puedeVerAnimales()): ?>
+                                <td class="actions-cell" style="text-align: center;">
+                                    <a href="medical_edit.php?id=<?php echo $record['id']; ?>" 
+                                        class="btn-edit" title="Editar registro">✏️</a>
+                                    
+                                    <a href="../../actions/medical/medical_delete.php?id=<?php echo $record['id']; ?>" 
+                                        class="btn-delete" 
+                                        onclick="return confirm('¿Seguro que deseas eliminar este registro médico?');"
+                                        title="Eliminar registro">🗑️</a>
+                                </td>
+                            <?php endif; ?>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

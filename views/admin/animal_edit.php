@@ -35,9 +35,15 @@ try {
                 <input type="text" name="nombre" value="<?php echo limpiar($animal['nombre']); ?>" required>
             </div>
 
-            <div class="form-group">
-                <label>Especie:</label>
-                <input type="text" name="especie" value="<?php echo limpiar($animal['especie']); ?>" required>
+            <div class="row" style="display:flex; gap:15px;">
+                <div class="form-group" style="flex:1;">
+                    <label>Especie:</label>
+                    <input type="text" name="especie" value="<?php echo limpiar($animal['especie']); ?>" required>
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>Dieta:</label>
+                    <input type="text" name="dieta" value="<?php echo limpiar($animal['dieta']); ?>" required>
+                </div>
             </div>
 
             <div class="row" style="display:flex; gap:15px;">
