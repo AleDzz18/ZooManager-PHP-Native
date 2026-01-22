@@ -28,3 +28,5 @@ access_log
 # pero mantenemos la carpeta assets/img
 assets/img/*
 !assets/img/.gitkeep
+
+digest.txt
