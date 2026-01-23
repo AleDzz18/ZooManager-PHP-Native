@@ -3,8 +3,17 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f9; /* Color de fondo suave */
     color: #333;
+    
+    /* Imagen de fondo con una capa blanquecina para legibilidad */
+    background:  
+                url('../img/fondo-zoo.png');
+    
+    /* Ajustes para que la imagen cubra toda la pantalla */
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed; /* El fondo se queda quieto al hacer scroll */
+    background-repeat: no-repeat;
 }
 
 .container {
@@ -173,4 +182,3 @@ th {
     object-fit: cover;
     border: 1px solid #ddd; /* Un borde sutil para que resalte en fondos claros */
 }
-
