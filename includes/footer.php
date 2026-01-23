@@ -5,5 +5,6 @@
                 <small>Desarrollado con fines académicos</small>
             </div>
         </footer>
+        <script src="<?php echo BASE_URL; ?>assets/js/bootstrap.bundle.min.js"></script>
     </body>
 </html>

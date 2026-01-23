@@ -51,9 +51,9 @@ try {
     <?php echo mostrarAlertas(); ?>
 
     <div class="table-responsive">
-        <table class="table-standard">
+        <table class="table table-striped table-hover">
             <thead>
-                <tr>
+                <tr class="table-dark">
                     <th style="width: 50px;">ID</th> <th>Nombre</th>
                     <th>Especie</th>
                     <th>Edad</th>
