@@ -38,9 +38,9 @@ try {
 }
 ?>
 
-<div class="container">
-    <div class="admin-header">
-        <h1>🐾 Gestión de Animales</h1>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold text-primary">🐾 Gestión de Animales</h2>
         <?php if (esAdmin()): ?>
             <a href="animal_create.php" class="btn-register">
                 + Nuevo Animal
@@ -51,17 +51,18 @@ try {
     <?php echo mostrarAlertas(); ?>
 
     <div class="table-responsive">
-        <table class="table table-striped table-hover">
+        <table class="table table-hover mb-0">
             <thead>
-                <tr class="table-dark">
-                    <th style="width: 50px;">ID</th> <th>Nombre</th>
+                <tr>
+                    <th>ID</th> 
+                    <th>Nombre</th>
                     <th>Especie</th>
                     <th>Edad</th>
                     <th>Hábitat</th>
                     <th>Dieta</th>
                     <th>Llegada</th>
                     <?php if (puedeVerAnimales()): ?>
-                        <th style="text-align: center;">Acciones</th>
+                        <th>Acciones</th>
                     <?php endif; ?>
                 </tr>
             </thead>
