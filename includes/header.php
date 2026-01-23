@@ -18,57 +18,53 @@ if (!defined('BASE_URL')) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $pageTitle ?? 'ZooManager'; ?> - Sistema de Gestión</title>
     
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css">
-    <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/bootstrap.min.css">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css">
+<link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/light.css">
+
 </head>
 <body>
 
-    <nav class="navbar navbar-expand-sm bg-body-tertiary">
-        <div class="container-fluid">
-            <a class="navbar-brand d-flex align-items-center" href="<?php echo BASE_URL; ?>index.php">
-                <img src="<?php echo BASE_URL; ?>assets/img/leon logo.png" 
-                    alt="Logo ZooManager" 
-                    width="40" 
-                    height="40" 
-                    class="d-inline-block align-text-top me-2">
-                <span class="fw-bold">ZooSystem</span>
-            </a>
+    <nav class="navbar navbar-expand-sm glass-navbar fixed-top">
+    <div class="container-fluid px-4"> <a class="navbar-brand d-flex align-items-center" href="<?php echo BASE_URL; ?>index.php">
+            <img src="<?php echo BASE_URL; ?>assets/img/leon logo.png" 
+            alt="Logo ZooManager" 
+            width="65" 
+            height="65" 
+                class="d-inline-block align-items-center me-2 rounded-circle">
+                <span class="fw-bold fs-3 text-dark">ZooSystem</span>
+        </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
             <span class="navbar-toggler-icon"></span>
-            </button>
+        </button>
 
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <li class="nav-item"><span class="nav-link text-dark"><?php echo htmlspecialchars($_SESSION['user_name']); ?> (<?php echo $_SESSION['user_role']; ?>)</span></li>
-                        <?php if (puedeVerAnimales()): ?>
-                            <li class="nav-item">
-                                <a class="nav-link" href="<?php echo BASE_URL; ?>views/admin/animals.php">Animales</a>
-                            </li>  
-                        <?php endif; ?>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <li class="nav-item"><span class="nav-link fw-semibold"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span></li>
+                    <?php if (puedeVerAnimales()): ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="<?php echo BASE_URL; ?>views/admin/habitats.php">Hábitats</a>
-                        </li>
-                    <?php else: ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="<?php echo BASE_URL; ?>index.php">Inicio</a>
-                        </li>
+                            <a class="nav-link" href="<?php echo BASE_URL; ?>views/admin/animals.php">Animales</a>
+                        </li>  
                     <?php endif; ?>
-                    
-                </ul>
+                    <li class="nav-item">
+                        <a class="nav-link" href="<?php echo BASE_URL; ?>views/admin/habitats.php">Hábitats</a>
+                    </li>
+                <?php endif; ?>
+            </ul>
 
-                <div class="d-flex">
-                    <?php if (isset($_SESSION['user_id'])): ?>
-                        <a href="<?php echo BASE_URL; ?>actions/auth/logout.php" class="btn btn-outline-danger">Salir</a>
-                    <?php else: ?>
-                        <a href="<?php echo BASE_URL; ?>views/auth/login.php" class="btn btn-outline-primary me-2">Entrar</a>
-                        <a href="<?php echo BASE_URL; ?>views/auth/register.php" class="btn btn-primary">Registrarse</a>
-                    <?php endif; ?>
-                </div>
-
+            <div class="d-flex gap-2"> <?php if (isset($_SESSION['user_id'])): ?>
+                    <a href="<?php echo BASE_URL; ?>actions/auth/logout.php" class="btn btn-danger rounded-pill px-4">Salir</a>
+                <?php else: ?>
+                    <a href="<?php echo BASE_URL; ?>views/auth/login.php" class="btn btn-custom-light rounded-pill px-4 fw-bold">Entrar</a>
+                    <a href="<?php echo BASE_URL; ?>views/auth/register.php" class="btn btn-custom-primary rounded-pill px-4 fw-bold">Registrarse</a>
+                <?php endif; ?>
             </div>
+
         </div>
-    </nav>
-    <main class="container">
+    </div>
+</nav>
+
+<div style="margin-top: 80px;"></div>

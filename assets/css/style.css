@@ -1,19 +1,46 @@
 /* --- ESTILOS GENERALES --- */
+/* --- ESTILOS GENERALES --- */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     color: #333;
+
+    /* --- CONFIGURACIÓN DEL FONDO ILUMINADO --- */
     
-    /* Imagen de fondo con una capa blanquecina para legibilidad */
-    background:  
-                url('../img/fondo-zoo.png');
-    
-    /* Ajustes para que la imagen cubra toda la pantalla */
-    background-size: cover;
-    background-position: center;
-    background-attachment: fixed; /* El fondo se queda quieto al hacer scroll */
+    background-image: 
+        /* Capa 1: El Foco de Luz (Degradado Radial) */
+        /* Va desde blanco al 60% de opacidad en el centro, hasta transparente en los bordes */
+        radial-gradient(circle at center, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 50%),
+        
+        /* Capa 2: Tu imagen de fondo original */
+        url('../img/fondo-zoo.png');
+
+    /* Propiedades que aplican a ambas capas */
+    background-size: cover;       /* Cubre toda la pantalla */
+    background-position: center;  /* Centrado */
+    background-attachment: fixed; /* El fondo (y la luz) se quedan quietos al hacer scroll */
     background-repeat: no-repeat;
+    
+    /* Configuración para el sticky footer que hicimos antes */
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Modifica tu clase .container o añade esta regla específica para main */
+main.container {
+    flex: 1;         /* MAGIA: Esto hace que el contenido crezca y ocupe todo el espacio libre, empujando el footer al final */
+    width: 90%;      /* Mantenemos tus estilos existentes */
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+/* Asegura que el footer no tenga márgenes que creen huecos blancos */
+footer, .bg-zoo-blue {
+    margin-top: 0;
+    width: 100%;
 }
 
 .container {
@@ -108,12 +135,26 @@ th {
 }
 
 .auth-card {
-    background: white;
+    /* Fondo semitransparente (igual que tu navbar) */
+    background: rgba(255, 255, 255, 0.25); 
+    
+    /* El truco del vidrio: desenfoca lo que hay detrás */
+    backdrop-filter: blur(15px);          
+    -webkit-backdrop-filter: blur(15px);  
+    
+    /* Borde sutil blanco para definir los límites */
+    border: 1px solid rgba(255, 255, 255, 0.4); 
+    
+    /* Sombra suave para separarlo del fondo */
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15); 
+    
     padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border-radius: 16px; /* Bordes un poco más redondeados se ven mejor en glass */
     width: 100%;
     max-width: 400px;
+    
+    /* Aseguramos que el texto sea legible */
+    color: #000; 
 }
 
 .form-group {
@@ -182,3 +223,67 @@ th {
     object-fit: cover;
     border: 1px solid #ddd; /* Un borde sutil para que resalte en fondos claros */
 }
+
+.footer-custom {
+    /* Usamos la variable definida en light.css */
+    background-color: var(--primary-color) !important;
+}
+
+/* Clase personalizada para el pie de página azul rey */
+.bg-zoo-blue {
+    background-color: #092247 !important;
+    color: #ffffff !important; 
+}
+
+/* --- BARRA DE NAVEGACIÓN ESTILO GLASS --- */
+.glass-navbar {
+    background: rgba(255, 255, 255, 0.2); /* Fondo blanco semitransparente */
+    backdrop-filter: blur(10px);          /* El truco mágico: desenfoca lo que hay detrás */
+    -webkit-backdrop-filter: blur(10px);  /* Soporte para Safari */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* Borde sutil */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Sombra suave */
+    transition: all 0.3s ease;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+/* Ajuste para el logo */
+.navbar-brand span {
+    color: #1a1a1a; /* Texto casi negro para contraste */
+    letter-spacing: -0.5px;
+}
+
+/* --- BOTONES PERSONALIZADOS --- */
+
+/* Botón Entrar (Blanco en la imagen) */
+.btn-custom-light {
+    background-color: #ffffff;
+    color: #333333;
+    border: 1px solid rgba(0,0,0,0.1);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.btn-custom-light:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px); /* Efecto sutil de elevación */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Botón Registrarse (Azul Oscuro/Rey en la imagen) */
+/* Usamos tu variable de light.css si es posible, o el hex directo */
+.btn-custom-primary {
+    background-color: #092247; /* El color exacto de tu light.css */
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 4px 6px rgba(9, 34, 71, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-custom-primary:hover {
+    background-color: #143d7a; /* Un tono un poco más claro al pasar el mouse */
+    color: #ffffff;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(9, 34, 71, 0.4);
+}
+
