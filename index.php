@@ -51,12 +51,15 @@ require_once 'config/db.php';
 
     <?php else: ?>
         <div style="text-align: center; padding: 40px 0;">
-            <div class="mb-4">
-                <img src="<?php echo BASE_URL; ?>assets/img/leon logo.png" alt="Logo ZooManager" style="width: 180px; height: auto;">
+            <div class="mb-0"> <img src="<?php echo BASE_URL; ?>assets/img/leon_logo.png" 
+            alt="Logo ZooManager" 
+            style="width: 320px; height: auto; display: block; margin: 0 auto; margin-bottom: -15px;"> 
             </div>
-            
-            <h2 class="display-4 fw-bold" style="color: #2c3e50;">ZooManager</h2>
-            <p class="lead">Sistema integral para la gestión zoológica, control de especies y monitoreo de hábitats.</p>
+            <h2 class="display-4 fw-bold" style="color: #1a1a1a;">ZooManager</h2>
+            <p class="fs-5 fw-medium mt-3" style="color: #1a1a1a; max-width: 700px; margin-left: auto; margin-right: auto; line-height: 1.6;">
+    Sistema integral para la gestión zoológica, control de especies <br> 
+    y monitoreo de hábitats.
+</p>
             
         </div>
     <?php endif; ?>
