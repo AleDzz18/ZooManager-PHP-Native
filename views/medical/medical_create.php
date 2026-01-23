@@ -52,6 +52,15 @@ $animal = $stmt->fetch();
                 <textarea name="tratamiento" rows="3" placeholder="Medicamentos recetados, reposo, dieta especial..."></textarea>
             </div>
 
+            <div class="form-group">
+                <label>Severidad:</label>
+                <select name="severidad" required>
+                    <option value="" disabled selected>Seleccione la severidad</option>
+                    <option value="Baja">Baja</option>
+                    <option value="Media">Media</option>
+                    <option value="Alta">Alta</option>
+                </select>
+
             <button type="submit" class="btn-submit" style="background:#2980b9;">Guardar Registro</button>
         </form>
     </div>

@@ -34,11 +34,18 @@ try {
                 <label>Nombre del Animal:</label>
                 <input type="text" name="nombre" required placeholder="Ej: Simba">
             </div>
+            <div class="row" style="display:flex; gap:15px;"> 
+                <div class="form-group" style="flex:1;">
+                    <label>Especie:</label>
+                    <input type="text" name="especie" required placeholder="Ej: León Africano">
+                </div>
 
-            <div class="form-group">
-                <label>Especie:</label>
-                <input type="text" name="especie" required placeholder="Ej: León Africano">
+                <div class="form-group" style="flex:1;">
+                    <label>Dieta:</label>
+                    <input type="text" name="dieta" required placeholder="Ej: Carnívoro">
+                </div>
             </div>
+            
 
             <div class="row" style="display:flex; gap:15px;">
                 <div class="form-group" style="flex:1;">

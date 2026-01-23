@@ -58,6 +58,7 @@ try {
                     <th>Especie</th>
                     <th>Edad</th>
                     <th>Hábitat</th>
+                    <th>Dieta</th>
                     <th>Llegada</th>
                     <?php if (puedeVerAnimales()): ?>
                         <th style="text-align: center;">Acciones</th>
@@ -76,6 +77,7 @@ try {
                                 <?php echo $animal['habitat_nombre'] ?? 'Sin asignar'; ?>
                             </span>
                         </td>
+                        <td><?php echo limpiar($animal['dieta'] ?? 'N/A'); ?></td>
                         <td><?php echo formatearFecha($animal['fecha_llegada']); ?></td>
                             <td class="actions-cell">
                                 <?php if (puedeVerAnimales()): ?>

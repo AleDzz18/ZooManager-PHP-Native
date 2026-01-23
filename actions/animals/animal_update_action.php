@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = limpiar($_POST['nombre']);
     $especie = limpiar($_POST['especie']);
     $edad = $_POST['edad'];
+    $dieta = limpiar($_POST['dieta']);
     $fecha = $_POST['fecha_llegada'];
     $habitat_id = $_POST['habitat_id'];
 
@@ -37,9 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         // --- ACTUALIZACIÓN ---
-        $sql = "UPDATE animals SET nombre = ?, especie = ?, edad = ?, fecha_llegada = ?, habitat_id = ? WHERE id = ?";
+        $sql = "UPDATE animals SET nombre = ?, especie = ?, edad = ?, fecha_llegada = ?, dieta = ?, habitat_id = ? WHERE id = ?";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$nombre, $especie, $edad, $fecha, $habitat_id, $id]);
+        $stmt->execute([$nombre, $especie, $edad, $fecha, $dieta, $habitat_id, $id]);
 
         $_SESSION['success'] = "Datos del animal actualizados correctamente.";
         header("Location: ../../views/admin/animals.php");
