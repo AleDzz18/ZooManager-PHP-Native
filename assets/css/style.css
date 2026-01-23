@@ -168,3 +168,9 @@ th {
     border: 1px solid #c3e6cb;
 }
 
+.navbar-brand img {
+    border-radius: 8px; /* Para darle esquinas redondeadas como en el diseño */
+    object-fit: cover;
+    border: 1px solid #ddd; /* Un borde sutil para que resalte en fondos claros */
+}
+

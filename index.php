@@ -3,13 +3,11 @@
 require 'includes/header.php'; 
 
 // 2. VALIDACIÓN DE MENSAJES FLASH (Feedback al usuario)
-// Si viene redireccionado de otra página con un mensaje (ej: Logout exitoso), lo mostramos aquí.
 ?>
 
 <div class="container" style="margin-top: 40px;">
     
     <?php echo mostrarAlertas(); ?>
-
 
     <?php if (isset($_SESSION['user_id'])): ?>
         <div class="dashboard-welcome">
@@ -38,15 +36,13 @@ require 'includes/header.php';
 
     <?php else: ?>
         <div style="text-align: center; padding: 40px 0;">
-            <h1 style="font-size: 2.5em; color: #2c3e50;">🦁 ZooManager</h1>
-            <p style="font-size: 1.2em; color: #7f8c8d; max-width: 600px; margin: 0 auto;">
-                Sistema integral para la gestión zoológica, control de especies y monitoreo de hábitats.
-            </p>
-            
-            <div style="margin-top: 30px;">
-                <a href="views/auth/login.php" class="btn-submit" style="text-decoration:none; padding: 12px 30px; margin-right: 10px;">Iniciar Sesión</a>
-                <a href="views/auth/register.php" class="btn-delete" style="text-decoration:none; background-color: #34495e; padding: 12px 30px;">Registrarse</a>
+            <div class="mb-4">
+                <img src="<?php echo BASE_URL; ?>assets/img/leon logo.png" alt="Logo ZooManager" style="width: 180px; height: auto;">
             </div>
+            
+            <h2 class="display-4 fw-bold" style="color: #2c3e50;">ZooManager</h2>
+            <p class="lead">Sistema integral para la gestión zoológica, control de especies y monitoreo de hábitats.</p>
+            
         </div>
     <?php endif; ?>
 
