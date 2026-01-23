@@ -24,11 +24,14 @@
 
 /* Aplicación general */
 body {
+    /* En style.css */
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     color: var(--bs-body-color);
-    
+
+    padding-top: 85px; /* Altura del navbar + un poco de aire */
+
     background-image:
         /* Capa 1: El Foco de Luz (Degradado Radial) */
         /* Va desde blanco al 60% de opacidad en el centro, hasta transparente en los bordes */
