@@ -1,5 +1,9 @@
 <?php require '../../includes/header.php'; ?>
 
+<?php if (isset($_SESSION['user_id'])) {
+    header("Location: " . BASE_URL . "index.php");
+    exit();}?>
+
 <div class="auth-container">
     <div class="auth-card">
         <h2>Iniciar Sesión</h2>
