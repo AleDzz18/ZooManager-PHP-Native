@@ -1,306 +1,240 @@
-/* --- ESTILOS GENERALES --- */
-
-/* Asegúrate de que light.css se importe primero */
+/* ==========================================================================
+    1. IMPORTACIONES Y VARIABLES (CONFIGURACIÓN)
+   ========================================================================== */
 @import url('../css/light.css');
 
 :root {
-    /* Mapeo de Colores Principales */
-    --bs-primary: var(--md-sys-color-primary); /* rgb(49 98 141) */
+    /* --- Mapeo: Bootstrap a Material Design 3 --- */
+    /* Al definir esto, Bootstrap usará tus colores automáticamente */
+    --bs-primary: var(--md-sys-color-primary);
     --bs-primary-rgb: 49, 98, 141; 
     
-    --bs-success: #27ae60; /* Color verde zoológico que ya tenías */
+    --bs-secondary: var(--md-sys-color-secondary);
+    --bs-body-bg: var(--md-sys-color-background);
+    --bs-body-color: var(--md-sys-color-on-background);
     
-    --bs-danger: var(--md-sys-color-error); /* rgb(186 26 26) */
-    --bs-danger-rgb: 186, 26, 26;
+    /* Mantenemos tu verde y rojo originales si te gustaban, o usamos M3 */
+    --bs-success: #27ae60; 
+    --bs-danger: var(--md-sys-color-error);
 
-    --bs-warning: var(--md-sys-color-tertiary); /* rgb(105 87 121) */
-
-    /* Mapeo de Fondos y Superficies */
-    --bs-body-bg: var(--md-sys-color-background); /* rgb(247 249 255) */
-    --bs-body-color: var(--md-sys-color-on-background); /* rgb(24 28 32) */
-    
-    --bs-tertiary-bg: var(--md-sys-color-surface-container-low); /* rgb(242 243 249) */
+    /* --- Variables Propias del Proyecto --- */
+    --zoo-glass-bg: rgba(255, 255, 255, 0.75);
+    --zoo-glass-border: rgba(255, 255, 255, 0.6);
+    --zoo-blue-footer: #092247;
 }
 
-/* Aplicación general */
+/* ==========================================================================
+   2. ESTILOS BASE Y LAYOUT (STICKY FOOTER)
+   ========================================================================== */
+html, body {
+    height: 100%;
+}
+
 body {
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    color: var(--bs-body-color);
-    
-    background-image:
-        /* Capa 1: El Foco de Luz (Degradado Radial) */
-        /* Va desde blanco al 60% de opacidad en el centro, hasta transparente en los bordes */
-        radial-gradient(circle at center, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0) 50%),
-        
-        /* Capa 2: Tu imagen de fondo original */
-        url('../img/fondo-zoo.png');
-
-    /* Propiedades que aplican a ambas capas */
-    background-size: cover;       /* Cubre toda la pantalla */
-    background-position: center;  /* Centrado */
-    background-attachment: fixed; /* El fondo (y la luz) se quedan quietos al hacer scroll */
-    background-repeat: no-repeat;
-
-    
-    /* Configuración para el sticky footer que hicimos antes */
-    min-height: 100vh;
+    /* Configuración Flex para empujar el footer hacia abajo */
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
+    
+    /* Fondo con imagen y degradado suave */
+    background-image: 
+        radial-gradient(circle at center, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 50%),
+        url('../img/fondo-zoo.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
 }
 
-/* Modifica tu clase .container o añade esta regla específica para main */
-main.container {
-    flex: 1;         /* MAGIA: Esto hace que el contenido crezca y ocupe todo el espacio libre, empujando el footer al final */
-    width: 90%;      /* Mantenemos tus estilos existentes */
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 20px 0;
+main {
+    flex: 1 0 auto; /* El contenido principal ocupa el espacio disponible */
 }
 
-/* Asegura que el footer no tenga márgenes que creen huecos blancos */
-footer, .bg-zoo-blue {
-    margin-top: 0;
-    width: 100%;
+/* ==========================================================================
+    3. NAVEGACIÓN (GLASSMORPHISM)
+   ========================================================================== */
+.glass-navbar {
+    background: rgba(255, 255, 255, 0.15); /* Color sólido con opacidad */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+    padding: 0.8rem 1rem;
 }
 
-.container {
-    width: 90%;
-    max-width: 1000px; /* Ancho máximo para que no se estire mucho */
-    margin: 0 auto;    /* Centrar contenido */
-    padding: 20px 0;
+.navbar-brand img {
+    border: 2px solid white;
 }
 
-/* --- BARRA DE NAVEGACIÓN --- */
-.main-nav {
-    background-color: #2c3e50; /* Azul oscuro corporativo */
-    color: white;
-    padding: 15px 0;
+.navbar-brand span {
+    color: var(--md-sys-color-on-surface);
+    font-weight: 700;
+    letter-spacing: -0.5px;
 }
 
-.nav-container {
-    display: flex;             /* Pone el logo y el menú en la misma línea */
-    justify-content: space-between;
+/* Links del menú */
+.nav-link {
+    color: var(--md-sys-color-scrim);
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--md-sys-color-primary);
+}
+
+/* ==========================================================================
+   4. COMPONENTES Y TARJETAS (CARD MATERIAL)
+   ========================================================================== */
+
+/* Tarjetas estilo Material 3 (Usadas en Index) */
+.card-material {
+    background-color: var(--md-sys-color-surface-container-low);
+    color: var(--md-sys-color-on-surface);
+    border: 1px solid rgba(255,255,255,0.5); /* Borde sutil */
+    border-radius: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s;
+    overflow: hidden;
+}
+
+.card-material:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+    background-color: var(--md-sys-color-surface-container);
+    border-color: var(--md-sys-color-primary);
+}
+
+/* Iconos circulares grandes */
+.material-icon-large {
+    width: 80px;
+    height: 80px;
+    font-size: 3.5rem;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+    background: var(--md-sys-color-tertiary-container);
+    color: var(--md-sys-color-on-tertiary-container);
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-    color: white;
-    text-decoration: none;
+/* Botones con forma de píldora (Pill) */
+.btn-material-primary {
+    background-color: var(--zoo-blue-footer);
+    color: var(--md-sys-color-on-primary);
+    border-radius: 50px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    border: none;
+    transition: background-color 0.2s;
 }
 
-/* --- MENÚ --- */
-.menu {
-    list-style: none; /* Quita los puntos de la lista */
-    margin: 0;
-    padding: 0;
-    display: flex;    /* Pone los botones uno al lado del otro */
-    gap: 20px;        /* Espacio entre botones */
+.btn-material-primary:hover {
+    background-color: var(--md-sys-color-primary-fixed-dim);
+    color: var(--md-sys-color-on-primary-fixed-variant);
 }
 
-.menu a {
-    color: #ecf0f1;
-    text-decoration: none;
-    font-size: 16px;
-}
-
-.menu a:hover {
-    color: #3498db; /* Azul claro al pasar el mouse */
-}
-
-/* --- BOTONES ESPECIALES --- */
-.btn-register {
-    background-color: #3498db;
-    padding: 8px 15px;
-    border-radius: 5px;
-}
-
-.menu .btn-register:hover {
-    color: white; 
-    background-color: #154e73;
-}
-
-.btn-logout {
-    background-color: #e74c3c; /* Rojo para salir */
-    padding: 5px 10px;
-    border-radius: 4px;
-}
-
-/* --- TABLAS --- */
-
-.table {
-    --bs-table-bg: var(--md-sys-color-surface-container-lowest);
-    --bs-table-striped-bg: var(--md-sys-color-surface-container-low);
-    --bs-table-hover-bg: var(--md-sys-color-surface-container-high);
-    border-color: var(--md-sys-color-outline-variant);
-}
-
-.table thead th {
+.btn-material-secondary {
     background-color: var(--md-sys-color-secondary-container);
     color: var(--md-sys-color-on-secondary-container);
+    border-radius: 50px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    border: none;
 }
 
-/* --- ESTILOS DE FORMULARIOS --- */
+.btn-material-secondary:hover {
+    background-color: var(--md-sys-color-secondary);
+    color: var(--md-sys-color-on-secondary);
+}
+
+/* ==========================================================================
+   5. MÓDULO DE AUTENTICACIÓN (LOGIN / REGISTRO)
+   ========================================================================== */
 .auth-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 70vh;
+    padding: 3rem 1rem;
+    width: 100%;
 }
 
 .auth-card {
-    /* Fondo semitransparente (igual que tu navbar) */
-    background: rgba(255, 255, 255, 0.25); 
-    
-    /* El truco del vidrio: desenfoca lo que hay detrás */
-    backdrop-filter: blur(15px);          
-    -webkit-backdrop-filter: blur(15px);  
-    
-    /* Borde sutil blanco para definir los límites */
-    border: 1px solid rgba(255, 255, 255, 0.4); 
-    
-    /* Sombra suave para separarlo del fondo */
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15); 
-    
-    padding: 30px;
-    border-radius: 16px; /* Bordes un poco más redondeados se ven mejor en glass */
     width: 100%;
-    max-width: 400px;
-    
-    /* Aseguramos que el texto sea legible */
-    color: #000; 
+    max-width: 450px;
+    background: rgba(255, 255, 255, 0.15); /* Más opacidad para leer mejor */
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border-radius: 24px;
+    padding: 2.5rem;
 }
 
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box; /* Importante para que el padding no estire el input */
-}
-
-.btn-submit {
-    width: 100%;
-    background-color: #27ae60; /* Verde zoológico */
-    color: white;
-    padding: 12px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-.btn-submit:hover {
-    background-color: #219150;
+.auth-card h2 {
+    color: var(--md-sys-color-primary);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-align: center;
 }
 
 .auth-link {
     text-align: center;
-    margin-top: 15px;
-    font-size: 0.9em;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
 }
 
-/* --- ESTILOS DE ALERTAS --- */
-.alert {
-    padding: 12px;
-    margin-bottom: 20px;
-    border-radius: 4px;
-    font-size: 0.9em;
-    text-align: center;
-    font-weight: bold;
+/* ==========================================================================
+    6. FOOTER Y UTILIDADES
+   ========================================================================== */
+footer {
+    flex-shrink: 0;
+    width: 100%;
 }
 
-.alert-error {
-    background-color: #f8d7da; /* Rojo suave */
-    color: #721c24;           /* Texto rojo oscuro */
-    border: 1px solid #f5c6cb;
-}
-
-.alert-success {
-    background-color: #d4edda; /* Verde suave */
-    color: #155724;           /* Texto verde oscuro */
-    border: 1px solid #c3e6cb;
-}
-
-.navbar-brand img {
-    border-radius: 8px; /* Para darle esquinas redondeadas como en el diseño */
-    object-fit: cover;
-    border: 1px solid #ddd; /* Un borde sutil para que resalte en fondos claros */
-}
-
-.footer-custom {
-    /* Usamos la variable definida en light.css */
-    background-color: var(--primary-color) !important;
-}
-
-/* Clase personalizada para el pie de página azul rey */
 .bg-zoo-blue {
-    background-color: #092247 !important;
-    color: #ffffff !important; 
+    background-color: var(--zoo-blue-footer) !important;
+    color: #ffffff !important;
 }
 
-/* --- BARRA DE NAVEGACIÓN ESTILO GLASS --- */
-.glass-navbar {
-    background: rgba(255, 255, 255, 0.2); /* Fondo blanco semitransparente */
-    backdrop-filter: blur(10px);          /* El truco mágico: desenfoca lo que hay detrás */
-    -webkit-backdrop-filter: blur(10px);  /* Soporte para Safari */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.3); /* Borde sutil */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); /* Sombra suave */
-    transition: all 0.3s ease;
-    padding-top: 15px;
-    padding-bottom: 15px;
+/* Utilidad para textos que deben resaltar sobre fondos claros */
+.text-on-surface {
+    color: var(--md-sys-color-on-surface);
 }
 
-/* Ajuste para el logo */
-.navbar-brand span {
-    color: #1a1a1a; /* Texto casi negro para contraste */
-    letter-spacing: -0.5px;
+/* Sobrescritura suave de Tablas Bootstrap para que sean transparentes */
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-striped-bg: rgba(255,255,255,0.4);
 }
 
-/* --- BOTONES PERSONALIZADOS --- */
-
-/* Botón Entrar (Blanco en la imagen) */
-.btn-custom-light {
-    background-color: #ffffff;
-    color: #333333;
-    border: 1px solid rgba(0,0,0,0.1);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    transition: all 0.3s ease;
+/* --- Ajustes para Inputs en Tarjetas Glass --- */
+.auth-card .form-control {
+    background: rgba(255, 255, 255, 0.5);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
 }
 
-.btn-custom-light:hover {
-    background-color: #f8f9fa;
-    transform: translateY(-1px); /* Efecto sutil de elevación */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+.auth-card .form-control:focus {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: var(--md-sys-color-primary);
+    box-shadow: 0 0 0 0.25rem rgba(49, 98, 141, 0.15);
 }
 
-/* Botón Registrarse (Azul Oscuro/Rey en la imagen) */
-/* Usamos tu variable de light.css si es posible, o el hex directo */
-.btn-custom-primary {
-    background-color: #092247; /* El color exacto de tu light.css */
-    color: #ffffff;
-    border: none;
-    box-shadow: 0 4px 6px rgba(9, 34, 71, 0.3);
-    transition: all 0.3s ease;
+/* --- Logo con Borde Blanco (Estilo Imagen) --- */
+.logo-auth {
+    border: 4px solid #ffffff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    background-color: white;
 }
 
-.btn-custom-primary:hover {
-    background-color: #143d7a; /* Un tono un poco más claro al pasar el mouse */
-    color: #ffffff;
-    transform: translateY(-1px);
-    box-shadow: 0 6px 12px rgba(9, 34, 71, 0.4);
+/* --- Etiquetas de formulario --- */
+.form-label {
+    color: var(--md-sys-color-on-surface-variant);
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-left: 5px;
 }
-

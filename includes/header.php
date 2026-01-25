@@ -5,7 +5,6 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once 'functions.php';
 
-// Definimos la constante si no existe para evitar errores de re-definición
 if (!defined('BASE_URL')) {
     define('BASE_URL', 'http://localhost/zoo-system/');
 }
@@ -19,50 +18,54 @@ if (!defined('BASE_URL')) {
     <title><?php echo $pageTitle ?? 'ZooManager'; ?> - Sistema de Gestión</title>
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>assets/css/style.css">
-
 </head>
 <body>
 
-<nav class="navbar navbar-expand-sm glass-navbar fixed-top">
-    <div class="container-fluid px-4"> 
+<nav class="navbar navbar-expand-lg glass-navbar fixed-top">
+    <div class="container"> 
         <a class="navbar-brand d-flex align-items-center" href="<?php echo BASE_URL; ?>index.php">
             <img src="<?php echo BASE_URL; ?>assets/img/leon_logo.png" 
-                alt="Logo ZooManager" 
-                width="65" 
-                height="65" 
-                class="d-inline-block align-items-center me-2 rounded-circle">
-                <span class="fw-bold fs-3 text-dark">ZooSystem</span>
+                alt="Logo" width="50" height="50" class="rounded-circle me-2 shadow-sm">
+            <span class="fw-bold text-on-surface">ZooManager</span>
         </a>
 
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="collapse navbar-collapse" id="navMain">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <?php if (isset($_SESSION['user_id'])): ?>
-                    <li class="nav-item"><span class="nav-link fw-semibold"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span></li>
+                    <li class="nav-item">
+                        <a class="nav-link px-3" href="<?php echo BASE_URL; ?>index.php">Inicio</a>
+                    </li>
                     <?php if (puedeVerAnimales()): ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="<?php echo BASE_URL; ?>views/admin/animals.php">Animales</a>
+                            <a class="nav-link px-3" href="<?php echo BASE_URL; ?>views/admin/animals.php">Animales</a>
                         </li>  
                     <?php endif; ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="<?php echo BASE_URL; ?>views/admin/habitats.php">Hábitats</a>
+                        <a class="nav-link px-3" href="<?php echo BASE_URL; ?>views/admin/habitats.php">Hábitats</a>
                     </li>
                 <?php endif; ?>
             </ul>
 
-            <div class="d-flex gap-2"> <?php if (isset($_SESSION['user_id'])): ?>
-                    <a href="<?php echo BASE_URL; ?>actions/auth/logout.php" class="btn btn-danger rounded-pill px-4">Salir</a>
+            <div class="d-flex align-items-center gap-3">
+                <?php if (isset($_SESSION['user_id'])): ?>
+                    <span class="small text-black d-none d-sm-inline">
+                        <i class="bi bi-person"></i> <?php echo htmlspecialchars($_SESSION['user_name']); ?>
+                    </span>
+                    <a href="<?php echo BASE_URL; ?>actions/auth/logout.php" 
+                        class="btn btn-outline-danger btn-sm rounded-pill px-4">Salir</a>
                 <?php else: ?>
-                    <a href="<?php echo BASE_URL; ?>views/auth/login.php" class="btn btn-custom-light rounded-pill px-4 fw-bold">Entrar</a>
-                    <a href="<?php echo BASE_URL; ?>views/auth/register.php" class="btn btn-custom-primary rounded-pill px-4 fw-bold">Registrarse</a>
+                    <a href="<?php echo BASE_URL; ?>views/auth/login.php" 
+                        class="btn btn-material-secondary btn-sm">Entrar</a>
+                    <a href="<?php echo BASE_URL; ?>views/auth/register.php" 
+                        class="btn btn-material-primary btn-sm">Registrarse</a>
                 <?php endif; ?>
             </div>
-
         </div>
     </div>
 </nav>
 
-<div style="margin-top: 80px;"></div>
+<main class="pt-5 mt-5">
