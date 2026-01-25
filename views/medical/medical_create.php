@@ -3,7 +3,7 @@ require '../../includes/auth_check.php';
 require '../../includes/header.php';
 require '../../config/db.php';
 
-// Obtener el ID del animal para saber a quién estamos atendiendo
+// Obtener el ID del animal
 $animal_id = $_GET['animal_id'] ?? null;
 
 if (!$animal_id) {
@@ -11,7 +11,7 @@ if (!$animal_id) {
     exit();
 }
 
-// Consultamos nombre para mostrarlo en el título
+// Consultamos nombre
 $stmt = $pdo->prepare("SELECT nombre FROM animals WHERE id = ?");
 $stmt->execute([$animal_id]);
 $animal = $stmt->fetch();
@@ -19,49 +19,58 @@ $animal = $stmt->fetch();
 
 <div class="auth-container">
     <div class="auth-card" style="max-width: 700px;">
-        <div class="admin-header">
-            <h2>🩺 Nuevo Registro Médico</h2>
-            <a href="medical_history.php?id=<?php echo $animal_id; ?>" class="btn-delete" style="background:#7f8c8d;">Cancelar</a>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-primary mb-0">Nuevo Registro Médico</h2>
+                <div class="text-muted small">
+                    Paciente: <strong><?php echo limpiar($animal['nombre']); ?></strong>
+                </div>
+            </div>
+            <a href="medical_history.php?id=<?php echo $animal_id; ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-x-lg"></i> Cancelar
+            </a>
         </div>
 
         <?php echo mostrarAlertas(); ?>
         
-        <p>Paciente: <strong><?php echo limpiar($animal['nombre']); ?></strong></p>
-
-        <form action="../../actions/medical/medical_create_action.php" method="POST" class="form-standard">
+        <form action="../../actions/medical/medical_create_action.php" method="POST">
             <input type="hidden" name="animal_id" value="<?php echo $animal_id; ?>">
 
-            <div class="row" style="display:flex; gap:15px;">
-                <div class="form-group" style="flex:1;">
-                    <label>Fecha del Suceso:</label>
-                    <input type="date" name="fecha" required value="<?php echo date('Y-m-d'); ?>">
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Fecha del Suceso</label>
+                    <input type="date" name="fecha" class="form-control" required value="<?php echo date('Y-m-d'); ?>">
                 </div>
-                <div class="form-group" style="flex:2;">
-                    <label>Motivo de Consulta / Descripción:</label>
-                    <input type="text" name="descripcion" required placeholder="Ej: Revisión rutinaria, herida en la pata...">
+                <div class="col-md-8">
+                    <label class="form-label fw-semibold">Motivo de Consulta</label>
+                    <input type="text" name="descripcion" class="form-control" required placeholder="Ej: Revisión rutinaria, herida...">
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Diagnóstico (Opcional):</label>
-                <textarea name="diagnostico" rows="2" placeholder="Qué enfermedad o condición tiene..."></textarea>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Diagnóstico <span class="text-muted fw-light">(Opcional)</span></label>
+                <textarea name="diagnostico" class="form-control" rows="2" placeholder="Describa la condición encontrada..."></textarea>
             </div>
 
-            <div class="form-group">
-                <label>Tratamiento / Medicación (Opcional):</label>
-                <textarea name="tratamiento" rows="3" placeholder="Medicamentos recetados, reposo, dieta especial..."></textarea>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Tratamiento / Medicación <span class="text-muted fw-light">(Opcional)</span></label>
+                <textarea name="tratamiento" class="form-control" rows="3" placeholder="Medicamentos, dosis, reposo..."></textarea>
             </div>
 
-            <div class="form-group">
-                <label>Severidad:</label>
-                <select name="severidad" required>
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Severidad del Caso</label>
+                <select name="severidad" class="form-select" required>
                     <option value="" disabled selected>Seleccione la severidad</option>
-                    <option value="Baja">Baja</option>
-                    <option value="Media">Media</option>
-                    <option value="Alta">Alta</option>
+                    <option value="Baja">🟢 Baja (Leve / Rutina)</option>
+                    <option value="Media">🟡 Media (Requiere atención)</option>
+                    <option value="Alta">🔴 Alta (Urgencia / Grave)</option>
                 </select>
+            </div>
 
-            <button type="submit" class="btn-submit" style="background:#2980b9;">Guardar Registro</button>
+            <button type="submit" class="btn btn-material-primary w-100 py-2">
+                <i class="bi bi-save me-2"></i> Guardar Registro
+            </button>
         </form>
     </div>
 </div>

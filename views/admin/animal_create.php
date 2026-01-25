@@ -5,9 +5,8 @@ require '../../includes/header.php';
 require '../../config/db.php';
 
 // 2. OBTENER LOS HÁBITATS PARA EL SELECT
-// Necesitamos llenar el menú desplegable con opciones reales de la BD.
 try {
-    // IMPORTANTE: Tu tabla usa 'nombre', no necesitamos cambiar esta consulta
+    // Consultamos solo ID y Nombre para llenar el select
     $stmt = $pdo->query("SELECT id, nombre FROM habitats");
     $habitats = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
@@ -15,53 +14,56 @@ try {
 }
 ?>
 
-<div class="auth-container"> <div class="auth-card" style="max-width: 600px;"> <div class="admin-header">
-            <h2>Registrar Nuevo Animal</h2>
-            <a href="animals.php" class="btn-delete" style="background:#7f8c8d;">Cancelar</a>
+<div class="auth-container">
+    
+    <div class="auth-card" style="max-width: 700px;"> 
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold text-primary mb-0">Registrar Nuevo Animal</h2>
+                <p class="text-muted mb-0 small">Ingresa los datos del nuevo habitante</p>
+            </div>
+            <a href="animals.php" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                <i class="bi bi-x-lg"></i> Cancelar
+            </a>
         </div>
 
-        <p>Completa los datos del nuevo integrante del zoológico.</p>
+        <?php echo mostrarAlertas(); ?>
 
-        <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert alert-error">
-                <?php echo $_SESSION['error']; unset($_SESSION['error']); ?>
-            </div>
-        <?php endif; ?>
-
-        <form action="../../actions/animals/animal_create_action.php" method="POST" class="form-standard">
+        <form action="../../actions/animals/animal_create_action.php" method="POST">
             
-            <div class="form-group">
-                <label>Nombre del Animal:</label>
-                <input type="text" name="nombre" required placeholder="Ej: Simba">
+            <div class="mb-3">
+                <label for="nombre" class="form-label fw-semibold">Nombre del Animal</label>
+                <input type="text" name="nombre" id="nombre" class="form-control" required placeholder="Ej: Simba">
             </div>
-            <div class="row" style="display:flex; gap:15px;"> 
-                <div class="form-group" style="flex:1;">
-                    <label>Especie:</label>
-                    <input type="text" name="especie" required placeholder="Ej: León Africano">
+
+            <div class="row g-3 mb-3"> 
+                <div class="col-md-6">
+                    <label for="especie" class="form-label fw-semibold">Especie</label>
+                    <input type="text" name="especie" id="especie" class="form-control" required placeholder="Ej: León Africano">
                 </div>
 
-                <div class="form-group" style="flex:1;">
-                    <label>Dieta:</label>
-                    <input type="text" name="dieta" required placeholder="Ej: Carnívoro">
+                <div class="col-md-6">
+                    <label for="dieta" class="form-label fw-semibold">Dieta</label>
+                    <input type="text" name="dieta" id="dieta" class="form-control" required placeholder="Ej: Carnívoro">
                 </div>
             </div>
             
-
-            <div class="row" style="display:flex; gap:15px;">
-                <div class="form-group" style="flex:1;">
-                    <label>Edad (Años):</label>
-                    <input type="number" name="edad" required min="0">
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    <label for="edad" class="form-label fw-semibold">Edad (Años)</label>
+                    <input type="number" name="edad" id="edad" class="form-control" required min="0" placeholder="0">
                 </div>
                 
-                <div class="form-group" style="flex:1;">
-                    <label>Fecha de Llegada:</label>
-                    <input type="date" name="fecha_llegada" required value="<?php echo date('Y-m-d'); ?>">
+                <div class="col-md-6">
+                    <label for="fecha_llegada" class="form-label fw-semibold">Fecha de Llegada</label>
+                    <input type="date" name="fecha_llegada" id="fecha_llegada" class="form-control" required value="<?php echo date('Y-m-d'); ?>">
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Asignar Hábitat:</label>
-                <select name="habitat_id" required>
+            <div class="mb-4">
+                <label for="habitat_id" class="form-label fw-semibold">Asignar Hábitat</label>
+                <select name="habitat_id" id="habitat_id" class="form-select" required>
                     <option value="">-- Selecciona un hábitat --</option>
                     
                     <?php foreach ($habitats as $h): ?>
@@ -69,11 +71,15 @@ try {
                             <?php echo limpiar($h['nombre']); ?>
                         </option>
                     <?php endforeach; ?>
-                    
                 </select>
+                <div class="form-text text-muted small">
+                    <i class="bi bi-info-circle"></i> Solo aparecerán los hábitats disponibles.
+                </div>
             </div>
 
-            <button type="submit" class="btn-submit">Guardar Animal</button>
+            <button type="submit" class="btn btn-material-primary w-100 py-2">
+                <i class="bi bi-save me-2"></i> Guardar Animal
+            </button>
         </form>
     </div>
 </div>
