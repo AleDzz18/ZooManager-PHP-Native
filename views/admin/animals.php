@@ -109,27 +109,29 @@ try {
                                 </td>
                                 
                                 <td class="text-end pe-4">
-                                    <div class="btn-group" role="group">
-                                        <?php if (puedeVerAnimales()): ?>
+                                    <div class="d-flex justify-content-end gap-2"> <?php if (puedeVerAnimales()): ?>
                                             <a href="../medical/medical_history.php?id=<?php echo $animal['id']; ?>" 
-                                                class="btn btn-sm btn-outline-info" 
-                                                title="Historial Médico">
-                                                📋
+                                                class="btn btn-sm text-info bg-light bg-opacity-50 rounded-circle shadow-sm" 
+                                                title="Historial Médico"
+                                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-clipboard2-pulse-fill"></i>
                                             </a>
                                         <?php endif; ?>
-                                        
+
                                         <?php if (esAdmin()): ?>
                                             <a href="animal_edit.php?id=<?php echo $animal['id']; ?>" 
-                                               class="btn btn-sm btn-outline-primary" 
-                                               title="Editar">
-                                                ✏️
+                                                class="btn btn-sm text-primary bg-light bg-opacity-50 rounded-circle shadow-sm" 
+                                                title="Editar"
+                                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-pencil-square"></i>
                                             </a>
-                                            
+
                                             <a href="../../actions/animals/animal_delete.php?id=<?php echo $animal['id']; ?>" 
-                                                class="btn btn-sm btn-outline-danger" 
+                                                class="btn btn-sm text-danger bg-light bg-opacity-50 rounded-circle shadow-sm" 
                                                 onclick="return confirm('¿Estás seguro de eliminar al animal #<?php echo $animal['id']; ?>?');"
-                                                title="Eliminar">
-                                                🗑️
+                                                title="Eliminar"
+                                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-trash3-fill"></i>
                                             </a>
                                         <?php endif; ?>
                                     </div>

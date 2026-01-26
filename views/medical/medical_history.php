@@ -112,18 +112,20 @@ try {
                                     
                                     <?php if (puedeVerAnimales()): ?>
                                         <td class="text-end pe-4">
-                                            <div class="btn-group">
+                                            <div class="d-flex justify-content-end gap-2">
                                                 <a href="medical_edit.php?id=<?php echo $record['id']; ?>" 
-                                                    class="btn btn-sm btn-outline-primary" 
-                                                    title="Editar">
-                                                    <i class="bi bi-pencil"></i>
+                                                    class="btn btn-sm text-primary bg-light bg-opacity-50 rounded-circle shadow-sm" 
+                                                    title="Editar Registro"
+                                                    style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="bi bi-pencil-square"></i>
                                                 </a>
                                                 
                                                 <a href="../../actions/medical/medical_delete.php?id=<?php echo $record['id']; ?>" 
-                                                    class="btn btn-sm btn-outline-danger" 
+                                                    class="btn btn-sm text-danger bg-light bg-opacity-50 rounded-circle shadow-sm" 
                                                     onclick="return confirm('¿Seguro que deseas eliminar este registro médico?');"
-                                                    title="Eliminar">
-                                                    <i class="bi bi-trash"></i>
+                                                    title="Eliminar Registro"
+                                                    style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                                                    <i class="bi bi-trash3-fill"></i>
                                                 </a>
                                             </div>
                                         </td>
