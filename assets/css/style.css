@@ -24,7 +24,7 @@
 }
 
 /* ==========================================================================
-   2. ESTILOS BASE Y LAYOUT (STICKY FOOTER)
+        2. ESTILOS BASE Y LAYOUT (STICKY FOOTER)
    ========================================================================== */
 html, body {
     height: 100%;
@@ -86,24 +86,40 @@ main {
 }
 
 /* ==========================================================================
-   4. COMPONENTES Y TARJETAS (CARD MATERIAL)
+    4. COMPONENTES Y TARJETAS (CARD MATERIAL)
    ========================================================================== */
 
-/* Tarjetas estilo Material 3 (Usadas en Index) */
 .card-material {
-    background-color: var(--md-sys-color-surface-container-low);
+    /* 1. FONDO: Base blanca con transparencia (Efecto Glass) 
+       Simula tu variable --md-sys-color-surface-container-lowest */
+    background: rgba(255, 255, 255, 0.25); 
+    
+    /* 2. EFECTO DESENFOQUE */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    /* 3. TEXTO: Usamos tu variable oficial de light.css */
     color: var(--md-sys-color-on-surface);
-    border: 1px solid rgba(255,255,255,0.5); /* Borde sutil */
+    
+    /* 4. BORDE: Usamos tu variable 'outline-variant' (Gris azulado suave) */
+    border: 1px solid var(--md-sys-color-outline-variant);
+    
     border-radius: 16px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s;
+    transition: all 0.3s ease;
     overflow: hidden;
 }
 
 .card-material:hover {
+    /* Al pasar el mouse, usamos tu color 'surface' con un poco de opacidad */
+    background: rgba(247, 249, 255, 0.6); 
+    
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-    background-color: var(--md-sys-color-surface-container);
+    
+    /* EFECTO GLOW: Usamos tu color primario (Azul/Dorado) para el borde */
     border-color: var(--md-sys-color-primary);
+    
+    /* Sombra suave */
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
 /* Iconos circulares grandes */
@@ -151,7 +167,7 @@ main {
 }
 
 /* ==========================================================================
-   5. MÓDULO DE AUTENTICACIÓN (LOGIN / REGISTRO)
+    5. MÓDULO DE AUTENTICACIÓN (LOGIN / REGISTRO)
    ========================================================================== */
 .auth-container {
     display: flex;

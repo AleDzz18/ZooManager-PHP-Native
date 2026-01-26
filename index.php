@@ -13,7 +13,7 @@ require_once 'config/db.php';
     <?php if (isset($_SESSION['user_id'])): ?>
         <div class="row justify-content-center mb-0">
             <div class="col-md-8 text-center">
-                <div class="p-4 rounded-4" style="background-color: var(--md-sys-color-surface-container-high);">
+                <div class="p-4 card-material">
                     <h1 class="display-5 fw-bold text-on-surface">👋 Hola, <?php echo limpiar($_SESSION['user_name']); ?></h1>
                     <p class="lead text-muted">Bienvenido al Panel de Control de ZooManager.</p>
                     
