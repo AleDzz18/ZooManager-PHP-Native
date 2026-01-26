@@ -1,4 +1,10 @@
 <?php 
+// --- EVITAR CACHÉ DEL NAVEGADOR ---
+// Esto obliga al navegador a no guardar "fotos" de esta página.
+header("Cache-Control: no-cache, no-store, must-revalidate"); // HTTP 1.1.
+header("Pragma: no-cache"); // HTTP 1.0.
+header("Expires: 0"); // Proxies.
+
 $pageTitle = "Iniciar Sesión";
 require '../../includes/header.php'; 
 

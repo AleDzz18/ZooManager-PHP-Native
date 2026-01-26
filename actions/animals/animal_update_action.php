@@ -1,48 +1,64 @@
 <?php
 session_start();
 require_once '../../config/db.php';
-require_once '../../includes/auth_check.php'; // Solo usuarios logueados editan
+require_once '../../includes/auth_check.php';
 require_once '../../includes/functions.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'];
     $nombre = limpiar($_POST['nombre']);
     $especie = limpiar($_POST['especie']);
-    $edad = $_POST['edad'];
+    $clima_animal = limpiar($_POST['clima']); // Nuevo campo
+    $edad = (int) $_POST['edad'];
     $dieta = limpiar($_POST['dieta']);
-    $fecha = $_POST['fecha_llegada'];
+    $fecha_llegada = $_POST['fecha_llegada'];
     $habitat_id = $_POST['habitat_id'];
 
     try {
-        // --- VALIDACIÓN COMPLEJA PARA EDICIÓN ---
+        // --- INICIO VALIDACIONES COMPLEJAS ---
+
+        // 1. VALIDACIÓN DE FECHA VS EDAD
+        $fecha_nacimiento_estimada = date('Y-m-d', strtotime("-$edad years"));
+        if ($fecha_llegada < $fecha_nacimiento_estimada) {
+            $_SESSION['error'] = "Error: La fecha de llegada ($fecha_llegada) es anterior al nacimiento estimado ($fecha_nacimiento_estimada).";
+            header("Location: ../../views/admin/animal_edit.php?id=" . $id);
+            exit();
+        }
+
+        // 2. VALIDAR CLIMA Y CAPACIDAD (Si cambió de hábitat o de requerimiento climático)
         
-        // Verificamos si el animal está cambiando de hábitat
+        // Obtenemos info del hábitat destino
+        $stmt_habitat = $pdo->prepare("SELECT clima, capacidad, (SELECT COUNT(*) FROM animals WHERE habitat_id = h.id) as total FROM habitats h WHERE id = ?");
+        $stmt_habitat->execute([$habitat_id]);
+        $info_habitat = $stmt_habitat->fetch();
+
+        // A) Validar Clima
+        if ($info_habitat['clima'] !== $clima_animal) {
+            $_SESSION['error'] = "Error: No puedes mover este animal a un hábitat '{$info_habitat['clima']}' porque requiere clima '$clima_animal'.";
+            header("Location: ../../views/admin/animal_edit.php?id=" . $id);
+            exit();
+        }
+
+        // B) Validar Capacidad (Solo si cambiamos de hábitat)
+        // Consultamos el habitat actual del animal antes de guardar
         $stmt_current = $pdo->prepare("SELECT habitat_id FROM animals WHERE id = ?");
         $stmt_current->execute([$id]);
-        $current_habitat = $stmt_current->fetchColumn();
+        $current_habitat_id = $stmt_current->fetchColumn();
 
-        // Si el hábitat destino es diferente al actual, verificamos cupo
-        if ($current_habitat != $habitat_id) {
-            $sql_check = "SELECT capacidad, 
-                        (SELECT COUNT(*) FROM animals WHERE habitat_id = h.id) as total 
-                        FROM habitats h WHERE id = ?";
-            $stmt_check = $pdo->prepare($sql_check);
-            $stmt_check->execute([$habitat_id]);
-            $res = $stmt_check->fetch();
-
-            if ($res['total'] >= $res['capacidad']) {
-                $_SESSION['error'] = "No se puede mover al animal. El hábitat destino está lleno.";
+        if ($current_habitat_id != $habitat_id) {
+            if ($info_habitat['total'] >= $info_habitat['capacidad']) {
+                $_SESSION['error'] = "El hábitat destino está lleno. Capacidad máxima: " . $info_habitat['capacidad'];
                 header("Location: ../../views/admin/animal_edit.php?id=" . $id);
                 exit();
             }
         }
 
         // --- ACTUALIZACIÓN ---
-        $sql = "UPDATE animals SET nombre = ?, especie = ?, edad = ?, fecha_llegada = ?, dieta = ?, habitat_id = ? WHERE id = ?";
+        $sql = "UPDATE animals SET nombre = ?, especie = ?, clima = ?, edad = ?, fecha_llegada = ?, dieta = ?, habitat_id = ? WHERE id = ?";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$nombre, $especie, $edad, $fecha, $dieta, $habitat_id, $id]);
+        $stmt->execute([$nombre, $especie, $clima_animal, $edad, $fecha_llegada, $dieta, $habitat_id, $id]);
 
-        $_SESSION['success'] = "Datos del animal actualizados correctamente.";
+        $_SESSION['success'] = "Datos y validaciones biológicas actualizadas correctamente.";
         header("Location: ../../views/admin/animals.php");
         exit();
 
@@ -52,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit();
     }
 } else {
-    // Si no es POST, redirigimos al listado de animales
     header("Location: ../../views/admin/animals.php");
     exit();
 }

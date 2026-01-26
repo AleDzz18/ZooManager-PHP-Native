@@ -255,3 +255,7 @@ footer {
     font-size: 0.9rem;
     margin-left: 5px;
 }
+
+.fw-bold {
+    color: var(--zoo-blue-footer); 
+}

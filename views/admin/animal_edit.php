@@ -48,21 +48,36 @@ try {
                 <input type="text" name="nombre" id="nombre" class="form-control" 
                     value="<?php echo limpiar($animal['nombre']); ?>" required>
             </div>
-
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label for="especie" class="form-label fw-semibold">Especie</label>
                     <input type="text" name="especie" id="especie" class="form-control" 
                         value="<?php echo limpiar($animal['especie']); ?>" required>
                 </div>
+
+                <div class="col-md-6">
+                    <label for="clima" class="form-label fw-semibold">Clima Requerido</label>
+                    <select name="clima" id="clima" class="form-select" required>
+                        <?php 
+                        $climas = ["Selva", "Desierto", "Acuático", "Polar", "Aviario", "Sabana"];
+                        // Asumimos que $animal['clima'] existe tras actualizar la BD
+                        $climaActual = $animal['clima'] ?? ''; 
+                        foreach ($climas as $c): 
+                        ?>
+                            <option value="<?php echo $c; ?>" <?php echo ($climaActual == $c) ? 'selected' : ''; ?>>
+                                <?php echo $c; ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label for="dieta" class="form-label fw-semibold">Dieta</label>
                     <input type="text" name="dieta" id="dieta" class="form-control" 
                         value="<?php echo limpiar($animal['dieta']); ?>" required>
                 </div>
-            </div>
-
-            <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label for="edad" class="form-label fw-semibold">Edad (Años)</label>
                     <input type="number" name="edad" id="edad" class="form-control" 

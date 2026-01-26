@@ -1,4 +1,9 @@
 <?php 
+// --- EVITAR CACHÉ DEL NAVEGADOR ---
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
+
 $pageTitle = "Registro de Personal";
 require '../../includes/header.php'; 
 

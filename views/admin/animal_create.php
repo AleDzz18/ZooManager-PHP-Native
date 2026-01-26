@@ -42,20 +42,33 @@ try {
                     <label for="especie" class="form-label fw-semibold">Especie</label>
                     <input type="text" name="especie" id="especie" class="form-control" required placeholder="Ej: León Africano">
                 </div>
-
+                
                 <div class="col-md-6">
-                    <label for="dieta" class="form-label fw-semibold">Dieta</label>
-                    <input type="text" name="dieta" id="dieta" class="form-control" required placeholder="Ej: Carnívoro">
+                    <label for="clima" class="form-label fw-semibold">Clima Requerido</label>
+                    <select name="clima" id="clima" class="form-select" required>
+                        <option value="" disabled selected>-- Selecciona --</option>
+                        <option value="Selva">🌴 Selva Tropical</option>
+                        <option value="Desierto">🌵 Desierto</option>
+                        <option value="Acuático">💧 Acuático</option>
+                        <option value="Polar">❄️ Polar</option>
+                        <option value="Aviario">🦅 Aviario</option>
+                        <option value="Sabana">🦁 Sabana</option>
+                    </select>
                 </div>
             </div>
             
             <div class="row g-3 mb-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <label for="dieta" class="form-label fw-semibold">Dieta</label>
+                    <input type="text" name="dieta" id="dieta" class="form-control" required placeholder="Ej: Carnívoro">
+                </div>
+
+                <div class="col-md-4">
                     <label for="edad" class="form-label fw-semibold">Edad (Años)</label>
                     <input type="number" name="edad" id="edad" class="form-control" required min="0" placeholder="0">
                 </div>
                 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="fecha_llegada" class="form-label fw-semibold">Fecha de Llegada</label>
                     <input type="date" name="fecha_llegada" id="fecha_llegada" class="form-control" required value="<?php echo date('Y-m-d'); ?>">
                 </div>
