@@ -10,9 +10,15 @@ Options -Indexes
 </Files>
 
 # --- PÁGINAS DE ERROR PERSONALIZADAS ---
-# Ajusta la ruta si tu carpeta no se llama zoo-system
-ErrorDocument 404 /zoo-system/views/errors/404.php
+
+# A) Errores del Cliente (Usuario se equivocó o no tiene permiso)
+# Redirigimos 403 y 404 a la misma vista para no dar pistas a atacantes
 ErrorDocument 403 /zoo-system/views/errors/404.php
+ErrorDocument 404 /zoo-system/views/errors/404.php
+
+# B) Errores del Servidor (Tu código falló o base de datos caída)
+ErrorDocument 500 /zoo-system/views/errors/500.php
+ErrorDocument 503 /zoo-system/views/errors/500.php
 
 # --- OCULTAR FIRMA DEL SERVIDOR ---
 # Esto evita que salga "Apache/2.4.58 (Win64) PHP/8.2..." al final de los errores

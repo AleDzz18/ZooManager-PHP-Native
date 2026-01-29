@@ -59,3 +59,21 @@ function puedeVerAnimales() {
 function obtenerClimasValidos() {
     return ['Desierto', 'Acuático', 'Polar', 'Aviario', 'Sabana', 'Selva'];
 }
+
+function esFechaValida($fecha) {
+    // 1. Validar formato estricto YYYY-MM-DD
+    $d = DateTime::createFromFormat('Y-m-d', $fecha);
+    if (!($d && $d->format('Y-m-d') === $fecha)) {
+        return false; // Formato incorrecto (ej: texto, o 2026-02-30)
+    }
+
+    // 2. Validar rango lógico (Ni antes de 1900 ni en el futuro)
+    $fecha_minima = '1900-01-01';
+    $fecha_actual = date('Y-m-d');
+
+    if ($fecha < $fecha_minima || $fecha > $fecha_actual) {
+        return false; // Fecha ilógica
+    }
+
+    return true;
+}

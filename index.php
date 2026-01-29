@@ -1,9 +1,11 @@
 <?php 
 // 1. Incluir Configuración y Header
-require 'includes/header.php'; 
 
 // 2. Conexión a la Base de Datos
 require_once 'config/db.php'; 
+
+require 'includes/header.php';
+
 ?>
 
 <div class="container py-5">

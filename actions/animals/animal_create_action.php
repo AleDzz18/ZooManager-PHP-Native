@@ -14,6 +14,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fecha_llegada = $_POST['fecha_llegada'];
     $habitat_id = $_POST['habitat_id'];
 
+    if (!esFechaValida($fecha_llegada)) {
+        $_SESSION['error'] = "Error de seguridad: La fecha proporcionada no es válida o es futura.";
+        header("Location: ../../views/admin/animal_create.php");
+        exit();
+    }
+
     if (!in_array($clima_animal, $clima_permitidos)) {
         $_SESSION['error'] = "Error de seguridad: El clima '$clima_animal' no es válido.";
         // Opcional: Podrías loguear esto como un intento de hackeo
