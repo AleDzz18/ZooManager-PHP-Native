@@ -1,6 +1,8 @@
 <?php
 require '../../includes/auth_check.php';
 require '../../includes/header.php';
+require_once '../../includes/functions.php';
+
 ?>
 
 <div class="auth-container">
@@ -22,20 +24,17 @@ require '../../includes/header.php';
             
             <div class="mb-3">
                 <label for="nombre" class="form-label fw-semibold">Nombre del Hábitat</label>
-                <input type="text" name="nombre" id="nombre" class="form-control" required placeholder="Ej: Sabana Africana Norte">
+                <input type="text" name="nombre" id="nombre" class="form-control" maxlength="50" required placeholder="Ej: Sabana Africana Norte">
             </div>
 
             <div class="row g-3 mb-3">
                 <div class="col-md-6">
                     <label for="clima" class="form-label fw-semibold">Tipo de Clima</label>
-                    <select name="clima" id="clima" class="form-select" required>
-                        <option value="" disabled selected>-- Selecciona --</option>
-                        <option value="Selva">🌴 Selva Tropical</option>
-                        <option value="Desierto">🌵 Desierto</option>
-                        <option value="Acuático">💧 Acuático</option>
-                        <option value="Polar">❄️ Polar</option>
-                        <option value="Aviario">🦅 Aviario</option>
-                        <option value="Sabana">🦁 Sabana</option>
+                    <select name="clima" class="form-select">
+                        <?php 
+                        foreach (obtenerClimasValidos() as $c): ?>
+                            <option value="<?php echo $c; ?>"><?php echo $c; ?></option>
+                        <?php endforeach; ?>
                     </select>
                 </div>
 

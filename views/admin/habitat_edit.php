@@ -53,7 +53,7 @@ try {
             <div class="mb-3">
                 <label for="nombre" class="form-label fw-semibold">Nombre del Hábitat</label>
                 <input type="text" name="nombre" id="nombre" class="form-control" 
-                    value="<?php echo limpiar($habitat['nombre']); ?>" required>
+                    value="<?php echo limpiar($habitat['nombre']); ?>" maxlength="50" required>
             </div>
 
             <div class="row g-3 mb-3">
@@ -61,8 +61,7 @@ try {
                     <label for="clima" class="form-label fw-semibold">Tipo de Clima</label>
                     <select name="clima" id="clima" class="form-select" required>
                         <?php 
-                        $climas = ["Selva", "Desierto", "Acuático", "Polar", "Aviario", "Sabana"];
-                        foreach ($climas as $c): 
+                        foreach (obtenerClimasValidos() as $c): 
                         ?>
                             <option value="<?php echo $c; ?>" <?php echo ($habitat['clima'] == $c) ? 'selected' : ''; ?>>
                                 <?php echo $c; ?>

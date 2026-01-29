@@ -7,12 +7,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 1. Limpieza de datos
     $nombre = limpiar($_POST['nombre']);
-    $tipo = limpiar($_POST['clima']);
+    $clima = limpiar($_POST['clima']);
+    $climas_permitidos = obtenerClimasValidos();
     $capacidad = (int) $_POST['capacidad'];
     $descripcion = limpiar($_POST['descripcion']);
 
+    if (!in_array($clima, $climas_permitidos)) {
+        $_SESSION['error'] = "Error de seguridad: El clima '$clima' no es válido.";
+        // Opcional: Podrías loguear esto como un intento de hackeo
+        header("Location: ../../views/admin/habitat_create.php");
+        exit();
+    }
+
+    if (strlen($nombre) > 50) {
+        $_SESSION['error'] = "El nombre del hábitat es muy largo (Máx 50 caracteres).";
+        header("Location: ../../views/admin/habitat_create.php");
+        exit();
+    }
+
     // 2. Validación básica
-    if (empty($nombre) || empty($tipo) || $capacidad < 1) {
+    if (empty($nombre) || empty($clima) || $capacidad < 1) {
         $_SESSION['error'] = "Por favor, revisa los campos. La capacidad debe ser al menos 1.";
         header("Location: ../../views/admin/habitat_create.php");
         exit();
@@ -34,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $sql = "INSERT INTO habitats (nombre, clima, capacidad, descripcion) VALUES (?, ?, ?, ?)";
         $stmt = $pdo->prepare($sql);
         
-        if ($stmt->execute([$nombre, $tipo, $capacidad, $descripcion])) {
+        if ($stmt->execute([$nombre, $clima, $capacidad, $descripcion])) {
             $_SESSION['success'] = "Hábitat '$nombre' creado exitosamente.";
             header("Location: ../../views/admin/habitats.php");
             exit();

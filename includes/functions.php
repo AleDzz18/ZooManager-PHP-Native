@@ -55,3 +55,7 @@ function puedeVerAnimales() {
     return isset($_SESSION['user_role']) && 
         ($_SESSION['user_role'] === 'admin' || $_SESSION['user_role'] === 'cuidador');
 }
+
+function obtenerClimasValidos() {
+    return ['Desierto', 'Acuático', 'Polar', 'Aviario', 'Sabana', 'Selva'];
+}

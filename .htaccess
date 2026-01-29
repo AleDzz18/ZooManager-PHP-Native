@@ -1,0 +1,19 @@
+# --- SEGURIDAD DEL SERVIDOR ---
+
+# 1. Evitar que se listan los archivos de las carpetas
+Options -Indexes
+
+# 2. Proteger el archivo .htaccess para que nadie lo pueda leer
+<Files .htaccess>
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# --- PÁGINAS DE ERROR PERSONALIZADAS ---
+# Ajusta la ruta si tu carpeta no se llama zoo-system
+ErrorDocument 404 /zoo-system/views/errors/404.php
+ErrorDocument 403 /zoo-system/views/errors/404.php
+
+# --- OCULTAR FIRMA DEL SERVIDOR ---
+# Esto evita que salga "Apache/2.4.58 (Win64) PHP/8.2..." al final de los errores
+ServerSignature Off
