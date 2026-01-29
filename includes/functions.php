@@ -1,4 +1,11 @@
 <?php
+
+// --- SEGURIDAD ANTI-ACCESO DIRECTO ---
+if (count(get_included_files()) == 1) {
+    header('HTTP/1.0 403 Forbidden');
+    exit("Acceso prohibido.");
+}
+
 /**
  * ARCHIVO DE FUNCIONES GLOBALES
  * Aquí centralizamos la lógica repetitiva para que el sistema sea fácil de mantener.

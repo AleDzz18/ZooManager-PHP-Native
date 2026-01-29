@@ -1,6 +1,7 @@
-# --- Configuraciones del Sistema ---
-# Ignorar el archivo de conexión real para no exponer usuario/password de la BD
+# --- SEGURIDAD (LO MÁS IMPORTANTE) ---
+# Ignoramos la llave real de la base de datos
 config/db.php
+# Nota: Mantén 'config/db_example.php' fuera de esta lista para que sirva de guía.
 
 # --- Archivos del Entorno de Desarrollo (IDE) ---
 .vscode/
@@ -10,23 +11,28 @@ config/db.php
 *.njsproj
 *.sln
 *.swp
+.settings/
 
-# --- Archivos del Sistema Operativo ---
+# --- Archivos del Sistema Operativo (Basura) ---
 .DS_Store
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# --- Temporales de PHP y Servidor ---
+# --- Logs y Temporales del Servidor ---
 *.log
 error_log
 access_log
-.htaccess_local
+php_errors.log
 
-# --- Archivos de Usuario / Subidas ---
-# Ignoramos las imágenes que subas para probar, 
-# pero mantenemos la carpeta assets/img
-assets/img/*
-!assets/img/.gitkeep
-
+# --- Archivos de Contexto (Tu archivo de texto con el código) ---
 digest.txt
+
+# --- MEDIOS (IMÁGENES Y SONIDOS) ---
+# IMPORTANTE: No ignoramos assets/img ni assets/sounds porque 
+# contienen el logo, el troll y el audio necesarios para que la web funcione.
+
+# Si en el futuro creas una carpeta para subir fotos de los animales,
+# agrégala aquí abajo (ejemplo: assets/uploads/)
+# assets/uploads/*
+# !assets/uploads/.gitkeep

@@ -1,0 +1,23 @@
+# zoo-system/config/.htaccess
+
+# 1. BLOQUEAR TODO POR DEFECTO
+# Esto protege db.php, db_example.php y cualquier otro archivo sensible
+<IfModule !mod_authz_core.c>
+    Order Deny,Allow
+    Deny from all
+</IfModule>
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+
+# 2. EXCEPCIÓN: PERMITIR SOLO INSTALL.PHP
+# Esto abre una ventana para que puedas ejecutar el instalador
+<Files install.php>
+    <IfModule !mod_authz_core.c>
+        Order Allow,Deny
+        Allow from all
+    </IfModule>
+    <IfModule mod_authz_core.c>
+        Require all granted
+    </IfModule>
+</Files>

@@ -13,7 +13,7 @@ Options -Indexes
 
 # A) Errores del Cliente (Usuario se equivocó o no tiene permiso)
 # Redirigimos 403 y 404 a la misma vista para no dar pistas a atacantes
-ErrorDocument 403 /zoo-system/views/errors/404.php
+ErrorDocument 403 /zoo-system/views/errors/403.php
 ErrorDocument 404 /zoo-system/views/errors/404.php
 
 # B) Errores del Servidor (Tu código falló o base de datos caída)
