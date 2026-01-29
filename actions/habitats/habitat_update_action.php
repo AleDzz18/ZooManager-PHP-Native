@@ -3,6 +3,8 @@ session_start();
 require_once '../../config/db.php';
 require_once '../../includes/functions.php';
 
+soloMetodoPost();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 1. CAPTURAR DATOS

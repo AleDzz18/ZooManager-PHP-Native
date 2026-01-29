@@ -77,3 +77,17 @@ function esFechaValida($fecha) {
 
     return true;
 }
+
+// 5. BLOQUEO DE ACCESO DIRECTO POR URL
+function soloMetodoPost() {
+    // Si el método NO es POST (es decir, alguien escribió la URL en el navegador)
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        // Opcional: Guardar mensaje de error
+        if (session_status() === PHP_SESSION_NONE) session_start();
+        $_SESSION['error'] = "Acceso denegado: No puedes acceder directamente a los archivos de acción.";
+        
+        // Lo mandamos al inicio
+        header("Location: ../../index.php");
+        exit();
+    }
+}

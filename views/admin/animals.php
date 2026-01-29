@@ -8,6 +8,8 @@
 // 1. SEGURIDAD
 require '../../includes/auth_check.php';
 
+require '../../config/db.php';
+
 // 2. INTERFAZ Y CONEXIÓN
 require '../../includes/header.php';
 
@@ -17,8 +19,6 @@ if (!puedeVerAnimales()) {
     header("Location: " . BASE_URL . "index.php");
     exit();
 }
-
-require '../../config/db.php';
 
 // 3. OBTENER DATOS
 try {
@@ -126,13 +126,18 @@ try {
                                                 <i class="bi bi-pencil-square"></i>
                                             </a>
 
-                                            <a href="../../actions/animals/animal_delete.php?id=<?php echo $animal['id']; ?>" 
-                                                class="btn btn-sm text-danger bg-light bg-opacity-50 rounded-circle shadow-sm" 
-                                                onclick="return confirm('¿Estás seguro de eliminar al animal #<?php echo $animal['id']; ?>?');"
-                                                title="Eliminar"
-                                                style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-                                                <i class="bi bi-trash3-fill"></i>
-                                            </a>
+                                            <form action="../../actions/animals/animal_delete.php" method="POST" style="display:inline;" 
+                                                onsubmit="return confirm('¿Estás seguro de eliminar al animal #<?php echo $animal['id']; ?>?');">
+
+                                                <input type="hidden" name="id" value="<?php echo $animal['id']; ?>">
+
+                                                <button type="submit" 
+                                                        class="btn btn-sm text-danger bg-light bg-opacity-50 rounded-circle shadow-sm" 
+                                                        title="Eliminar"
+                                                        style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: none;">
+                                                    <i class="bi bi-trash3-fill"></i>
+                                                </button>
+                                            </form>
                                         <?php endif; ?>
                                     </div>
                                 </td>

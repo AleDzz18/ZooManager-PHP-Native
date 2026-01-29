@@ -8,6 +8,8 @@ session_start();
 require_once '../../config/db.php';
 require_once '../../includes/functions.php';
 
+soloMetodoPost();
+
 // 3. VERIFICAR QUE LOS DATOS LLEGUEN POR POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     

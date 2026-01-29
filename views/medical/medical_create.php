@@ -1,7 +1,13 @@
 <?php
 require '../../includes/auth_check.php';
-require '../../includes/header.php';
 require '../../config/db.php';
+require '../../includes/header.php';
+
+if (!puedeVerAnimales()) {
+    $_SESSION['error'] = "No tienes permisos para acceder al historial médico.";
+    header("Location: " . BASE_URL . "index.php");
+    exit();
+}
 
 // Obtener el ID del animal
 $animal_id = $_GET['animal_id'] ?? null;

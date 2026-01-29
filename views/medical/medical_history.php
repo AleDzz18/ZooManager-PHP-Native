@@ -1,8 +1,14 @@
 <?php
 // 1. SEGURIDAD Y CONEXIÓN
 require '../../includes/auth_check.php';
-require '../../includes/header.php';
 require '../../config/db.php';
+require '../../includes/header.php';
+
+if (!puedeVerAnimales()) {
+    $_SESSION['error'] = "No tienes permisos para acceder al historial médico.";
+    header("Location: " . BASE_URL . "index.php");
+    exit();
+}
 
 // 2. OBTENER ID DEL ANIMAL
 $animal_id = $_GET['id'] ?? null;
@@ -120,13 +126,18 @@ try {
                                                     <i class="bi bi-pencil-square"></i>
                                                 </a>
                                                 
-                                                <a href="../../actions/medical/medical_delete.php?id=<?php echo $record['id']; ?>" 
-                                                    class="btn btn-sm text-danger bg-light bg-opacity-50 rounded-circle shadow-sm" 
-                                                    onclick="return confirm('¿Seguro que deseas eliminar este registro médico?');"
-                                                    title="Eliminar Registro"
-                                                    style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-                                                    <i class="bi bi-trash3-fill"></i>
-                                                </a>
+                                                <form action="<?php echo BASE_URL; ?>actions/medical/medical_delete.php" method="POST" style="display:inline;"
+                                                    onsubmit="return confirm('¿Seguro que deseas eliminar este registro médico?');">
+
+                                                    <input type="hidden" name="id" value="<?php echo $record['id']; ?>">
+
+                                                    <button type="submit" 
+                                                            class="btn btn-sm btn-outline-danger rounded-circle shadow-sm" 
+                                                            title="Eliminar Registro"
+                                                            style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: none;">
+                                                        <i class="bi bi-trash3-fill"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     <?php endif; ?>

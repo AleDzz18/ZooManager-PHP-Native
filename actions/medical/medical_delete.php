@@ -1,56 +1,65 @@
 <?php
+// actions/medical/medical_delete.php
 session_start();
 require_once '../../config/db.php';
 require_once '../../includes/auth_check.php';
 require_once '../../includes/functions.php';
 
-// 1. SOLO ADMIN PUEDE BORRAR HISTORIAL
+// 1. SEGURIDAD: Solo permitir peticiones POST
+soloMetodoPost(); 
+
+// 2. VERIFICAR PERMISOS (Solo Admin)
 if (!esAdmin()) {
     $_SESSION['error'] = "No tienes permisos para eliminar registros médicos.";
     header("Location: ../../views/admin/animals.php");
     exit();
 }
 
-// 2. OBTENER ID
-$id = isset($_GET['id']) ? $_GET['id'] : null;
+// 3. CAPTURAR EL ID
+// Usamos $_POST['id'] directamente. Si no existe, probamos $_REQUEST por seguridad.
+$id = $_POST['id'] ?? null;
+
+// DEBUG (Opcional): Si sale error, descomenta la siguiente línea para ver qué llega
+// var_dump($_POST); die(); 
 
 if ($id) {
     try {
-        // --- PASO CLAVE: RECUPERAR EL ANIMAL_ID ANTES DE BORRAR ---
-        // Necesitamos saber de quién es este historial para redirigir correctamente
-        // después de borrarlo.
+        // A) BUSCAR EL ANIMAL_ID ANTES DE BORRAR
+        // Necesitamos saber a qué animal pertenecía este registro para volver a su historial
         $stmt_find = $pdo->prepare("SELECT animal_id FROM medical_records WHERE id = ?");
         $stmt_find->execute([$id]);
-        $registro = $stmt_find->fetch();
+        $registro = $stmt_find->fetch(PDO::FETCH_ASSOC);
 
-        // Si no existe el registro, nos vamos a la lista general
         if (!$registro) {
+            $_SESSION['error'] = "El registro médico no existe o ya fue eliminado.";
             header("Location: ../../views/admin/animals.php");
             exit();
         }
 
         $animal_id = $registro['animal_id'];
 
-        // 3. AHORA SÍ, BORRAR EL REGISTRO
+        // B) EJECUTAR EL BORRADO
         $sql = "DELETE FROM medical_records WHERE id = ?";
         $stmt = $pdo->prepare($sql);
         
         if ($stmt->execute([$id])) {
-            $_SESSION['success'] = "Registro eliminado del historial.";
+            $_SESSION['success'] = "Registro eliminado correctamente.";
         } else {
-            $_SESSION['error'] = "No se pudo eliminar el registro.";
+            $_SESSION['error'] = "No se pudo eliminar el registro de la base de datos.";
         }
 
-        // 4. REDIRECCIONAR AL HISTORIAL DE ESE ANIMAL
+        // C) REDIRECCIONAR AL HISTORIAL DEL ANIMAL
         header("Location: ../../views/medical/medical_history.php?id=" . $animal_id);
         exit();
 
     } catch (PDOException $e) {
-        $_SESSION['error'] = "Error de base de datos: " . $e->getMessage();
-        // En caso de error, volvemos a la lista general para no romper el flujo
+        $_SESSION['error'] = "Error técnico: " . $e->getMessage();
         header("Location: ../../views/admin/animals.php");
+        exit();
     }
 } else {
+    // Si caemos aquí, es porque $_POST['id'] llegó vacío
+    $_SESSION['error'] = "Error: ID no recibido. Verifica el formulario.";
     header("Location: ../../views/admin/animals.php");
     exit();
 }

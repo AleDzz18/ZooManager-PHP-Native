@@ -4,6 +4,8 @@ require_once '../../config/db.php';
 require_once '../../includes/auth_check.php';
 require_once '../../includes/functions.php';
 
+soloMetodoPost();
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = $_POST['id'];
     $nombre = limpiar($_POST['nombre']);

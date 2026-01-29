@@ -1,8 +1,15 @@
 <?php
 // 1. SEGURIDAD Y CONEXIONES
 require '../../includes/auth_check.php';
-require '../../includes/header.php';
 require '../../config/db.php';
+require '../../includes/header.php';
+
+// Verificación de permisos
+if (!puedeVerAnimales()) {
+    $_SESSION['error'] = "No tienes permisos para acceder a la gestión de habitats.";
+    header("Location: " . BASE_URL . "index.php");
+    exit();
+}
 
 // 2. CONSULTA AVANZADA
 $sql = "SELECT h.*, COUNT(a.id) as ocupacion_actual 
@@ -124,13 +131,18 @@ try {
                                                     <i class="bi bi-pencil-square"></i>
                                                 </a>
 
-                                                <a href="../../actions/habitats/habitat_delete.php?id=<?php echo $h['id']; ?>" 
-                                                    class="btn btn-sm text-danger bg-light bg-opacity-50 rounded-circle shadow-sm" 
-                                                    onclick="return confirm('¿Seguro? Si borras el hábitat, los animales quedarán sin casa.');"
-                                                    title="Eliminar"
-                                                    style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-                                                    <i class="bi bi-trash3-fill"></i>
-                                                </a>
+                                                <form action="../../actions/habitats/habitat_delete.php" method="POST" style="display:inline;" 
+                                                    onsubmit="return confirm('¿Seguro? Si borras el hábitat, los animales quedarán sin casa.');">
+
+                                                    <input type="hidden" name="id" value="<?php echo $h['id']; ?>">
+
+                                                    <button type="submit" 
+                                                            class="btn btn-sm text-danger bg-light bg-opacity-50 rounded-circle shadow-sm" 
+                                                            title="Eliminar"
+                                                            style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: none;">
+                                                        <i class="bi bi-trash3-fill"></i>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     <?php endif; ?>

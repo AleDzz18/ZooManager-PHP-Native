@@ -4,22 +4,22 @@ require_once '../../config/db.php';
 require_once '../../includes/auth_check.php';
 require_once '../../includes/functions.php';
 
-// 1. VERIFICAR PERMISOS DE ADMINISTRADOR
-// Solo el admin puede destruir hábitats.
+// 1. SEGURIDAD: SOLO POST
+soloMetodoPost(); 
+
+// 2. VERIFICAR PERMISOS (Solo Admin)
 if (!esAdmin()) {
     $_SESSION['error'] = "Acceso denegado. Solo administradores pueden eliminar hábitats.";
     header("Location: ../../views/admin/habitats.php");
     exit();
 }
 
-$id = isset($_GET['id']) ? $_GET['id'] : null;
+// 3. CAPTURAR ID DESDE POST
+$id = isset($_POST['id']) ? $_POST['id'] : null;
 
 if ($id) {
     try {
-        // 2. VERIFICAR SI HAY ANIMALES DENTRO (OPCIONAL PERO RECOMENDADO)
-        // Aunque la BD tenga "SET NULL", es bueno avisar o limpiar.
-        // En este caso, confiamos en la restricción de la BD, pero ejecutamos el delete.
-
+        // Ejecutamos el borrado
         $sql = "DELETE FROM habitats WHERE id = ?";
         $stmt = $pdo->prepare($sql);
         
@@ -30,12 +30,12 @@ if ($id) {
         }
 
     } catch (PDOException $e) {
-        // Captura si hay un error de llave foránea u otro problema técnico
         $_SESSION['error'] = "Error de base de datos: " . $e->getMessage();
     }
+} else {
+    $_SESSION['error'] = "Error: ID no recibido.";
 }
 
-// 3. VOLVER A LA LISTA
 header("Location: ../../views/admin/habitats.php");
 exit();
 ?>

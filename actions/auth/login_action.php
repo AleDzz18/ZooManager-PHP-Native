@@ -7,6 +7,8 @@ session_start();
 require_once '../../config/db.php';
 require_once '../../includes/functions.php';
 
+soloMetodoPost();
+
 // 3. VERIFICAR MÉTODO POST
 // Solo procesamos si los datos vienen del formulario.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {

@@ -1,8 +1,15 @@
 <?php
 // 1. SEGURIDAD
 require '../../includes/auth_check.php';
-require '../../includes/header.php';
 require '../../config/db.php';
+require '../../includes/header.php';
+
+// Verificación de permisos
+if (!puedeVerAnimales()) {
+    $_SESSION['error'] = "No tienes permisos para acceder al historial médico.";
+    header("Location: " . BASE_URL . "index.php");
+    exit();
+}
 
 // 2. CAPTURAR EL ID
 $id = $_GET['id'] ?? null;

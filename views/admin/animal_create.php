@@ -1,8 +1,14 @@
 <?php
 // 1. EL GUARDIA DE SEGURIDAD
 require '../../includes/auth_check.php';
-require '../../includes/header.php';
 require '../../config/db.php';
+require '../../includes/header.php';
+// Verificación de permisos
+if (!puedeVerAnimales()) {
+    $_SESSION['error'] = "No tienes permisos para acceder a la gestión de animales.";
+    header("Location: " . BASE_URL . "index.php");
+    exit();
+}
 
 // 2. OBTENER LOS HÁBITATS PARA EL SELECT
 try {

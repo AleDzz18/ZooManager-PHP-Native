@@ -4,6 +4,8 @@ require_once '../../config/db.php';
 require_once '../../includes/auth_check.php';
 require_once '../../includes/functions.php';
 
+soloMetodoPost();
+
 // 1. SOLO PROCESAR SI ES POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
