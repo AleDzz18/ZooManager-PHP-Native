@@ -37,7 +37,7 @@ $base_url = "/zoo-system/";
         }
 
         h1 {
-            font-size: 2.5rem; /* Texto un poco más pequeño */
+            font-size: 2rem; /* Texto un poco más pequeño */
             margin-top: 0;
             margin-bottom: 1rem;
             text-shadow: 2px 2px #fff;
