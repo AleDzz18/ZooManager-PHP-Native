@@ -12,12 +12,12 @@
 
 # 2. EXCEPCIÓN: PERMITIR SOLO INSTALL.PHP
 # Esto abre una ventana para que puedas ejecutar el instalador
-<Files install.php>
-    <IfModule !mod_authz_core.c>
-        Order Allow,Deny
-        Allow from all
-    </IfModule>
-    <IfModule mod_authz_core.c>
-        Require all granted
-    </IfModule>
-</Files>
+# <Files install.php>
+#    <IfModule !mod_authz_core.c>
+#        Order Allow,Deny
+#        Allow from all
+#    </IfModule>
+#    <IfModule mod_authz_core.c>
+#        Require all granted
+#    </IfModule>
+# </Files>
