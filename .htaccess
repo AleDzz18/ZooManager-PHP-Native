@@ -1,25 +1,42 @@
-# --- SEGURIDAD DEL SERVIDOR ---
+# =============================================================
+# ARCHIVO DE CONFIGURACIÓN DEL SERVIDOR (.htaccess)
+# =============================================================
 
-# 1. Evitar que se listan los archivos de las carpetas
+# 1. EVITAR LISTADO DE DIRECTORIOS
+# Si falta un index.php, evita que se vean los archivos de la carpeta.
 Options -Indexes
 
-# 2. Proteger el archivo .htaccess para que nadie lo pueda leer
-<Files .htaccess>
+# 2. PROTEGER ARCHIVOS SENSIBLES (BLINDAJE)
+# Usamos una expresión regular para bloquear acceso a:
+# - .htaccess, .htpasswd (Configuración del servidor)
+# - .git, .gitignore (Control de versiones)
+# - .env, .env.example (Variables de entorno)
+# - composer.json, package.json (Dependencias)
+# - digest.txt (Tu resumen de código)
+<FilesMatch "^\.(htaccess|htpasswd|git|env)|^(composer|package)\.(json|lock)|digest\.txt$">
     Order Allow,Deny
     Deny from all
-</Files>
+</FilesMatch>
 
-# --- PÁGINAS DE ERROR PERSONALIZADAS ---
-
-# A) Errores del Cliente (Usuario se equivocó o no tiene permiso)
-# Redirigimos 403 y 404 a la misma vista para no dar pistas a atacantes
+# 3. PÁGINAS DE ERROR PERSONALIZADAS
+# Redirigimos al usuario a nuestras vistas bonitas cuando algo falla.
 ErrorDocument 403 /zoo-system/views/errors/403.php
 ErrorDocument 404 /zoo-system/views/errors/404.php
-
-# B) Errores del Servidor (Tu código falló o base de datos caída)
 ErrorDocument 500 /zoo-system/views/errors/500.php
 ErrorDocument 503 /zoo-system/views/errors/500.php
 
-# --- OCULTAR FIRMA DEL SERVIDOR ---
-# Esto evita que salga "Apache/2.4.58 (Win64) PHP/8.2..." al final de los errores
+# 4. SEGURIDAD ADICIONAL (HEADERS)
+<IfModule mod_headers.c>
+    # Evita que tu web sea incrustada en un iframe de otro sitio (Anti-Clickjacking)
+    Header set X-Frame-Options "SAMEORIGIN"
+    
+    # Evita que el navegador "adivine" el tipo de archivo (Seguridad MIME)
+    Header set X-Content-Type-Options "nosniff"
+    
+    # Activa la protección XSS básica del navegador (si está disponible)
+    Header set X-XSS-Protection "1; mode=block"
+</IfModule>
+
+# 5. OCULTAR FIRMA DEL SERVIDOR
+# Evita que los hackers sepan qué versión exacta de Apache/PHP usas.
 ServerSignature Off

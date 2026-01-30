@@ -1,97 +1,85 @@
 # 🦁 ZooManager - Sistema de Gestión de Zoológico
 
-**ZooManager** es una aplicación web robusta desarrollada en **PHP Nativo (Vanilla PHP)** bajo una arquitectura MVC simplificada. Este sistema permite la administración integral de hábitats, animales y registros médicos, implementando reglas de negocio complejas y una interfaz moderna basada en **Glassmorphism**.
-
-![Estado](https://img.shields.io/badge/Estado-Finalizado-success) ![PHP](https://img.shields.io/badge/PHP-8.2-blue) ![MySQL](https://img.shields.io/badge/DB-MySQL-orange) ![Bootstrap](https://img.shields.io/badge/Frontend-Bootstrap_5-purple)
+**ZooManager** es una plataforma web integral desarrollada en **PHP Nativo (Vanilla PHP)** bajo una arquitectura modular tipo MVC. Este sistema administra hábitats, animales y registros médicos, implementando reglas de negocio complejas, seguridad defensiva y una interfaz moderna basada en principios de **HCI/UX**.
 
 ---
 
-## 📋 Características Técnicas
+## 📋 Características Destacadas
 
-Este proyecto fue diseñado priorizando la seguridad, la integridad de datos y la independencia de librerías externas pesadas.
+### 🧠 Lógica de Negocio y Validaciones ("Complex Validation")
+El sistema implementa reglas estrictas para mantener la coherencia biológica y operativa:
+1.  **Compatibilidad Climática:** El sistema impide asignar un animal a un hábitat con un clima incompatible (ej: Un Pingüino [Polar] no puede vivir en la Sabana).
+2.  **Control de Capacidad:** No permite exceder el límite máximo de animales por hábitat.
+3.  **Integridad en Actualizaciones:** No permite reducir la capacidad de un hábitat si la cantidad de animales actuales supera el nuevo límite propuesto.
 
-### 🔐 Seguridad y Arquitectura
-* **Autenticación Segura:** Login y registro con hash de contraseñas (`password_hash`), protección contra fuerza bruta y manejo de sesiones seguras.
-* **Prevención de Cache:** Cabeceras HTTP implementadas para evitar que el botón "Atrás" del navegador muestre páginas protegidas tras el logout.
-* **Consultas Preparadas (PDO):** Protección total contra inyección SQL.
-* **Arquitectura Modular:** Separación clara entre Vistas (`views/`), Lógica (`actions/`) y Configuración.
+### 🔐 Seguridad Avanzada
+* **Protección CSRF:** Formularios de eliminación protegidos contra ataques *Cross-Site Request Forgery* (uso estricto de POST).
+* **Defensa en Profundidad:**
+    * Archivos críticos (`config/`, `includes/`) protegidos contra acceso directo vía `.htaccess` y bloqueos a nivel de PHP.
+    * **Anti-Intrusión (Error 403):** Sistema de disuasión personalizado para accesos no autorizados.
+* **Manejo de Errores:** Páginas personalizadas para errores 404 (No encontrado) y 500 (Error del servidor) para evitar exponer rutas o datos técnicos.
+* **Sanitización:** Prevención de XSS (Cross-Site Scripting) en todas las entradas y salidas de datos.
 
-### 🧠 Reglas de Negocio (Validaciones)
-El sistema implementa lógica estricta para garantizar la coherencia biológica:
-1.  **Control de Capacidad:** No permite añadir animales si el hábitat ha alcanzado su límite.
-2.  **Compatibilidad Climática:** Valida que el clima del animal coincida con el del hábitat (ej. no permite un animal *Polar* en un hábitat *Desértico*).
-3.  **Consistencia Temporal:** Impide registrar una fecha de llegada anterior a la fecha de nacimiento estimada del animal.
-
-### 🎨 Frontend
-* **Diseño Glassmorphism:** Interfaz moderna con efectos de desenfoque y transparencias.
-* **Modo Offline:** Utiliza **Bootstrap Icons** descargados localmente, eliminando la dependencia de CDNs (funciona sin internet).
-
----
-
-## 🚀 Guía de Instalación (Paso a Paso)
-
-Para poner en marcha el proyecto en tu servidor local (XAMPP, WAMP, etc.), sigue estos pasos:
-
-### 1. Clonar el Proyecto
-Coloca la carpeta del proyecto dentro de tu directorio público (ej. `C:/xampp/htdocs/zoo-system`).
-
-### 2. Base de Datos
-Hemos incluido un script de instalación automática. No necesitas importar SQL manualmente.
-1.  Enciende tu servidor **Apache** y **MySQL**.
-2.  Abre tu navegador y ejecuta la siguiente ruta:
-    ```
-    http://localhost/zoo-system/config/install.php
-    ```
-3.  El script creará la base de datos `zoo_system`, las tablas y las relaciones automáticamente.
-
-### 3. Configuración de Conexión
-Para que el sistema se conecte a la base de datos recién creada:
-1.  Ve a la carpeta `config/`.
-2.  Busca el archivo `db_example.php`.
-3.  **Renómbralo** a `db.php`.
-4.  Ábrelo y verifica tus credenciales (por defecto en XAMPP suelen ser):
-    ```php
-    $host = 'localhost';
-    $dbname = 'zoo_system';
-    $username = 'root';
-    $password = ''; // Vacío en XAMPP
-    ```
-
-### 4. Acceder
-¡Listo! Ya puedes ir a la página de inicio:
+### 💻 Interfaz y Experiencia de Usuario (UX)
+* Diseño **Glassmorphism** limpio y moderno usando Bootstrap 5.
+* Feedback visual inmediato (Alertas de éxito/error).
+* Iconografía intuitiva (Bootstrap Icons) para facilitar la navegación.
 
 ---
 
-## 👤 Credenciales por Defecto
+## 📂 Estructura del Proyecto
 
-El instalador crea automáticamente un usuario **Administrador** para que puedas empezar a gestionar:
-
-* **Email:** `usuario1@gmail.com`
-* **Contraseña:** (La contraseña por defecto se define en el script `install.php`, generalmente configurada durante el desarrollo).
-
-> **Nota:** Puedes registrar nuevos usuarios desde la pantalla de registro. El primer usuario siempre tendrá rol de Administrador si se usa el script por defecto.
-
----
-
-## 📂 Estructura del Directorio
-
-Para facilitar la navegación del código a otros desarrolladores:
+La estructura está organizada para separar la lógica de la presentación:
 
 ```text
 zoo-system/
-├── actions/           # Lógica del servidor (Recibe POST, procesa y redirige)
-│   ├── animals/       # CRUD de Animales
-│   ├── auth/          # Login, Register, Logout
-│   ├── habitats/      # CRUD de Hábitats
-│   └── medical/       # Lógica de historial médico
-├── assets/            # Recursos estáticos
-│   ├── bootstrap-icons/ # Iconos locales (svg/fonts)
-│   ├── css/           # Estilos personalizados (Glassmorphism)
-│   └── img/           # Imágenes del sitio
-├── config/            # Archivos de conexión a BD (db.php)
-├── includes/          # Fragmentos PHP reutilizables (Header, Footer, Auth Check)
-├── views/             # Interfaz de Usuario (HTML + PHP para mostrar datos)
-│   ├── admin/         # Vistas de gestión
-│   ├── auth/          # Formularios de acceso
-│   └── medical/       # Vistas de historia clínica
-└── index.php          # Dashboard principal
+├── actions/           # MOTOR: Recibe peticiones POST, procesa lógica y redirige
+│   ├── animals/       # Lógica para Animales
+│   ├── auth/          # Lógica de Autenticación (Login/Register)
+│   ├── habitats/      # Lógica para Hábitats
+│   └── medical/       # Lógica para Historial Médico
+├── assets/            # RECURSOS: CSS, JS, Imágenes y Sonidos
+│   ├── img/           # Incluye recursos de error (404, 500, troll)
+│   └── sounds/        # Audio para alertas de seguridad
+├── config/            # CONFIGURACIÓN: Base de datos e instalación
+│   ├── db_example.php # Plantilla de conexión segura
+│   └── install.php    # Script de instalación automática
+├── includes/          # COMPONENTES: Header, Footer, Funciones Globales
+├── views/             # VISTA: Interfaz de usuario (HTML + PHP)
+│   ├── admin/         # Paneles de gestión
+│   ├── auth/          # Login y Registro
+│   ├── errors/        # Páginas de error personalizadas (403, 404, 500)
+│   └── medical/       # Vistas de historial médico
+├── index.php          # Dashboard principal
+└── .htaccess          # Reglas de seguridad del servidor Apache
+
+🚀 Instalación y Despliegue
+Requisitos Previos
+Servidor Web (Apache/Nginx)
+
+PHP 8.0 o superior
+
+MySQL / MariaDB
+
+Pasos
+Clonar/Descargar el repositorio en tu carpeta htdocs o www.
+
+Configurar Base de Datos:
+
+Ve a la carpeta config/.
+
+Renombra db_example.php a db.php.
+
+Edita db.php con tus credenciales (Host, Usuario, Contraseña, Puerto).
+
+Instalar Tablas:
+
+Desde el navegador, accede a: http://localhost/zoo-system/config/install.php
+
+Esto creará la base de datos zoo_system y las tablas necesarias automáticamente.
+
+Nota: Se creará un usuario administrador por defecto (ver pantalla de instalación).
+
+Finalizar:
+
+Por seguridad, elimina o bloquea el acceso a install.php una vez finalizada la instalación.

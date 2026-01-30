@@ -1,17 +1,20 @@
 <?php
-// 1. SEGURIDAD
+/**
+ * VISTA: EDITAR EVENTO MÉDICO
+ * Permite modificar un diagnóstico existente.
+ */
+
 require '../../includes/auth_check.php';
 require '../../config/db.php';
 require '../../includes/header.php';
 
-// Verificación de permisos
 if (!puedeVerAnimales()) {
-    $_SESSION['error'] = "No tienes permisos para acceder al historial médico.";
+    $_SESSION['error'] = "Acceso denegado.";
     header("Location: " . BASE_URL . "index.php");
     exit();
 }
 
-// 2. CAPTURAR EL ID
+// 1. CAPTURAR EL ID DEL REGISTRO
 $id = $_GET['id'] ?? null;
 
 if (!$id) {
@@ -20,8 +23,8 @@ if (!$id) {
 }
 
 try {
-    // 3. OBTENER DATOS
-    $sql = "SELECT m.*, a.nombre as nombre_animal 
+    // 2. OBTENER DATOS (Incluyendo nombre del animal para contexto)
+    $sql = "SELECT m.*, a.nombre as nombre_animal, m.animal_id 
             FROM medical_records m 
             JOIN animals a ON m.animal_id = a.id 
             WHERE m.id = ?";
@@ -44,13 +47,12 @@ try {
         
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h2 class="fw-bold text-primary mb-0">Editar Registro Médico</h2>
+                <h2 class="fw-bold text-primary mb-0">Editar Historial</h2>
                 <div class="text-muted small">
                     Paciente: <strong><?php echo limpiar($registro['nombre_animal']); ?></strong>
                 </div>
             </div>
-            <a href="medical_history.php?id=<?php echo $registro['animal_id']; ?>" 
-                class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+            <a href="medical_history.php?id=<?php echo $registro['animal_id']; ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
                 <i class="bi bi-arrow-left"></i> Volver
             </a>
         </div>
@@ -62,21 +64,19 @@ try {
             <input type="hidden" name="id" value="<?php echo $registro['id']; ?>">
             <input type="hidden" name="animal_id" value="<?php echo $registro['animal_id']; ?>">
 
-            <div class="row g-3 mb-3">
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Fecha</label>
-                    <input type="date" name="fecha" class="form-control" required 
-                           value="<?php echo $registro['fecha']; ?>">
-                </div>
-                
-                <div class="col-md-6">
-                    <label class="form-label fw-semibold">Severidad</label>
-                    <select name="severidad" class="form-select" required>
-                        <option value="Baja" <?php echo ($registro['severidad'] == 'Baja') ? 'selected' : ''; ?>>🟢 Baja</option>
-                        <option value="Media" <?php echo ($registro['severidad'] == 'Media') ? 'selected' : ''; ?>>🟡 Media</option>
-                        <option value="Alta" <?php echo ($registro['severidad'] == 'Alta') ? 'selected' : ''; ?>>🔴 Alta</option>
-                    </select>
-                </div>
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Fecha</label>
+                <input type="date" name="fecha" class="form-control" required 
+                       value="<?php echo $registro['fecha']; ?>">
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Severidad</label>
+                <select name="severidad" class="form-select" required>
+                    <option value="Baja" <?php echo ($registro['severidad'] == 'Baja') ? 'selected' : ''; ?>>🟢 Baja</option>
+                    <option value="Media" <?php echo ($registro['severidad'] == 'Media') ? 'selected' : ''; ?>>🟡 Media</option>
+                    <option value="Alta" <?php echo ($registro['severidad'] == 'Alta') ? 'selected' : ''; ?>>🔴 Alta</option>
+                </select>
             </div>
 
             <div class="mb-3">

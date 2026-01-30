@@ -1,20 +1,25 @@
 <?php
-// 1. SEGURIDAD Y CONEXIÓN
+/**
+ * VISTA: HISTORIAL MÉDICO
+ * Diseño original preservado - Lógica corregida
+ */
+
 require '../../includes/auth_check.php';
 require '../../config/db.php';
 require '../../includes/header.php';
 
+// 1. VALIDACIÓN DE PERMISOS
 if (!puedeVerAnimales()) {
     $_SESSION['error'] = "No tienes permisos para acceder al historial médico.";
     header("Location: " . BASE_URL . "index.php");
     exit();
 }
 
-// 2. OBTENER ID DEL ANIMAL
+// 2. OBTENER Y VALIDAR ID DEL ANIMAL
 $animal_id = $_GET['id'] ?? null;
 
 if (!$animal_id) {
-    header("Location: animals.php");
+    header("Location: ../admin/animals.php");
     exit();
 }
 
@@ -25,7 +30,7 @@ try {
     $animal = $stmt_animal->fetch(PDO::FETCH_ASSOC);
 
     if (!$animal) {
-        die("Animal no encontrado.");
+        die("Error: El animal solicitado no existe.");
     }
 
     // 4. CONSULTAR HISTORIAL MÉDICO
@@ -46,12 +51,10 @@ try {
             <h2 class="fw-bold mb-0">
                 <i class="bi bi-clipboard-pulse"></i> Historial Médico
             </h2>
-            <div class="text-muted mt-1">
-                Paciente: <strong><?php echo limpiar($animal['nombre']); ?></strong> 
-                <span class="badge bg-secondary bg-opacity-10 text-secondary ms-2">
-                    <?php echo limpiar($animal['especie']); ?>
-                </span>
-            </div>
+            <div class="text-muted">
+                    Paciente: <strong><?php echo limpiar($animal['nombre']); ?></strong> 
+                    <span class="badge bg-secondary ms-2"><?php echo limpiar($animal['especie']); ?></span>
+                </div>
         </div>
         <div class="d-flex gap-2">
             <a href="../admin/animals.php" class="btn btn-outline-secondary btn-sm rounded-pill px-3 d-flex align-items-center">
@@ -82,68 +85,67 @@ try {
                         </tr>
                     </thead>
                     <tbody>
-                        <?php if (count($registros) > 0): ?>
-                            <?php foreach ($registros as $record): ?>
-                                <?php 
-                                    // Lógica de colores para la severidad
-                                    $sevClass = match($record['severidad']) {
-                                        'Alta' => 'bg-danger bg-opacity-10 text-danger border-danger',
-                                        'Media' => 'bg-warning bg-opacity-10 text-warning border-warning', // Bootstrap warning es amarillo/naranja
-                                        default => 'bg-success bg-opacity-10 text-success border-success' // Baja
-                                    };
-                                ?>
-                                <tr>
-                                    <td class="ps-4 text-nowrap">
-                                        <i class="bi bi-calendar-event text-muted me-1"></i>
-                                        <?php echo formatearFecha($record['fecha']); ?>
-                                    </td>
-                                    
-                                    <td class="fw-semibold text-dark">
-                                        <?php echo limpiar($record['descripcion']); ?>
-                                    </td>
-                                    
-                                    <td class="small text-muted">
-                                        <?php echo !empty($record['diagnostico']) ? limpiar($record['diagnostico']) : '<span class="text-secondary opacity-50">-</span>'; ?>
-                                    </td>
-                                    
-                                    <td class="small text-muted">
-                                        <?php echo !empty($record['tratamiento']) ? limpiar($record['tratamiento']) : '<span class="text-secondary opacity-50">-</span>'; ?>
-                                    </td>
-                                    
-                                    <td class="text-center">
-                                        <span class="badge rounded-pill border <?php echo $sevClass; ?> px-3">
-                                            <?php echo limpiar($record['severidad']); ?>
-                                        </span>
-                                    </td>
-                                    
-                                    <?php if (puedeVerAnimales()): ?>
-                                        <td class="text-end pe-4">
-                                            <div class="d-flex justify-content-end gap-2">
-                                                <a href="medical_edit.php?id=<?php echo $record['id']; ?>" 
-                                                    class="btn btn-sm text-primary bg-light bg-opacity-50 rounded-circle shadow-sm" 
-                                                    title="Editar Registro"
-                                                    style="width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
-                                                    <i class="bi bi-pencil-square"></i>
-                                                </a>
+                        <?php foreach ($registros as $registro): ?>
+                            <?php 
+                                // Lógica visual de severidad
+                                $sevClass = match($registro['severidad']) {
+                                    'Alta' => 'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25',
+                                    'Media' => 'bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25', 
+                                    default => 'bg-success bg-opacity-10 text-success border border-success border-opacity-25' 
+                                };
+                            ?>
+                            <tr>
+                                <td class="ps-4 text-nowrap fw-medium">
+                                    <i class="bi bi-calendar-event text-muted me-1"></i>
+                                    <?php echo formatearFecha($registro['fecha']); ?>
+                                </td>
+                                
+                                <td class="fw-semibold text-dark">
+                                    <?php echo limpiar($registro['descripcion']); ?>
+                                </td>
+                                
+                                <td class="small text-muted">
+                                    <?php echo !empty($registro['diagnostico']) ? limpiar($registro['diagnostico']) : '<span class="opacity-50">-</span>'; ?>
+                                </td>
+                                
+                                <td class="small text-muted">
+                                    <?php echo !empty($registro['tratamiento']) ? limpiar($registro['tratamiento']) : '<span class="opacity-50">-</span>'; ?>
+                                </td>
+                                
+                                <td class="text-center">
+                                    <span class="badge rounded-pill <?php echo $sevClass; ?> px-3 py-2">
+                                        <?php echo limpiar($registro['severidad']); ?>
+                                    </span>
+                                </td>
+                                
+                                <?php if (puedeVerAnimales()): ?>
+                                    <td class="text-end pe-4">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="medical_edit.php?id=<?php echo $registro['id']; ?>" 
+                                                class="btn btn-sm btn-outline-primary rounded-circle shadow-sm" 
+                                                style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;">
+                                                <i class="bi bi-pencil-fill"></i>
+                                            </a>
+                                            
+                                            <form action="<?php echo BASE_URL; ?>actions/medical/medical_delete.php" method="POST" style="display:inline;"
+                                                onsubmit="return confirm('¿Seguro que deseas eliminar este registro médico?');">
                                                 
-                                                <form action="<?php echo BASE_URL; ?>actions/medical/medical_delete.php" method="POST" style="display:inline;"
-                                                    onsubmit="return confirm('¿Seguro que deseas eliminar este registro médico?');">
-
-                                                    <input type="hidden" name="id" value="<?php echo $record['id']; ?>">
-
-                                                    <button type="submit" 
-                                                            class="btn btn-sm btn-outline-danger rounded-circle shadow-sm" 
-                                                            title="Eliminar Registro"
-                                                            style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: none;">
-                                                        <i class="bi bi-trash3-fill"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    <?php endif; ?>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
+                                                <input type="hidden" name="id" value="<?php echo $registro['id']; ?>">
+                                                
+                                                <button type="submit" 
+                                                        class="btn btn-sm btn-outline-danger rounded-circle shadow-sm" 
+                                                        title="Eliminar Registro"
+                                                        style="width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border: none;">
+                                                    <i class="bi bi-trash3-fill"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                <?php endif; ?>
+                            </tr>
+                        <?php endforeach; ?>
+                        
+                        <?php if (empty($registros)): ?>
                             <tr>
                                 <td colspan="6" class="text-center py-5">
                                     <div class="text-muted opacity-75">

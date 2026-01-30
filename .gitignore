@@ -1,38 +1,39 @@
-# --- SEGURIDAD (LO MÁS IMPORTANTE) ---
-# Ignoramos la llave real de la base de datos
-config/db.php
-# Nota: Mantén 'config/db_example.php' fuera de esta lista para que sirva de guía.
+# =============================================================
+# ARCHIVO GITIGNORE - ZOOMANAGER
+# =============================================================
 
-# --- Archivos del Entorno de Desarrollo (IDE) ---
+# --- 1. SEGURIDAD CRÍTICA (NUNCA SUBIR) ---
+# Archivo de conexión con credenciales reales
+config/db.php
+
+# --- 2. DEPENDENCIAS Y LIBRERÍAS ---
+# Si usas Composer en el futuro, esto ignora las librerías descargadas
+/vendor/
+
+# --- 3. ARCHIVOS DE ENTORNO DE DESARROLLO (IDE) ---
 .vscode/
 .idea/
+.settings/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.swp
-.settings/
+*.sublime-project
+*.sublime-workspace
 
-# --- Archivos del Sistema Operativo (Basura) ---
+# --- 4. BASURA DEL SISTEMA OPERATIVO ---
 .DS_Store
 Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# --- Logs y Temporales del Servidor ---
+# --- 5. LOGS Y TEMPORALES ---
 *.log
 error_log
 access_log
 php_errors.log
 
-# --- Archivos de Contexto (Tu archivo de texto con el código) ---
+# --- 6. ARCHIVOS ESPECÍFICOS DEL PROYECTO ---
+# Resumen de código (para IA o auditoría)
 digest.txt
-
-# --- MEDIOS (IMÁGENES Y SONIDOS) ---
-# IMPORTANTE: No ignoramos assets/img ni assets/sounds porque 
-# contienen el logo, el troll y el audio necesarios para que la web funcione.
-
-# Si en el futuro creas una carpeta para subir fotos de los animales,
-# agrégala aquí abajo (ejemplo: assets/uploads/)
-# assets/uploads/*
-# !assets/uploads/.gitkeep

@@ -1,6 +1,6 @@
 <?php
 // views/errors/403.php
-// Ajusta esta ruta si tu carpeta se llama distinto
+// RUTA ABSOLUTA
 $base_url = "/zoo-system/";
 ?>
 <!DOCTYPE html>
@@ -22,6 +22,8 @@ $base_url = "/zoo-system/";
             justify-content: center;
             text-align: center;
             overflow: hidden;
+            cursor: pointer; /* Mano en toda la pantalla para incitar clic */
+            user-select: none;
         }
         
         .troll-container {
@@ -29,15 +31,15 @@ $base_url = "/zoo-system/";
             padding: 2rem;
             background: rgba(0, 20, 0, 0.95);
             box-shadow: 0 0 20px #0f0;
-            
-            /* --- AJUSTES DE TAMAÑO --- */
-            max-width: 500px; /* Contenedor más estrecho */
-            width: 90%;       /* Para que no se salga en móviles */
+            max-width: 500px;
+            width: 90%;
             border-radius: 10px;
+            position: relative;
+            z-index: 2;
         }
 
         h1 {
-            font-size: 2rem; /* Texto un poco más pequeño */
+            font-size: 2rem;
             margin-top: 0;
             margin-bottom: 1rem;
             text-shadow: 2px 2px #fff;
@@ -46,8 +48,7 @@ $base_url = "/zoo-system/";
 
         img {
             width: 100%;
-            /* --- IMAGEN MÁS PEQUEÑA --- */
-            max-width: 250px; /* Tamaño ideal para el meme */
+            max-width: 250px;
             height: auto;
             border: 3px solid #fff;
             margin: 10px 0;
@@ -71,22 +72,38 @@ $base_url = "/zoo-system/";
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
 
         .btn-back:hover {
             background: #000;
             color: #0f0;
-            box-shadow: 0 0 10px #0f0;
+            box-shadow: 0 0 15px #0f0;
+        }
+
+        /* Estilo TRAMPA (Rojo) */
+        .btn-trap {
+            background: #f00 !important;
+            color: #fff !important;
+            border-color: #f00 !important;
+            box-shadow: 0 0 20px #f00 !important;
+            animation: temblor 0.2s infinite;
         }
 
         @keyframes parpadeo {
             from { opacity: 1; }
             to { opacity: 0.3; }
         }
+
+        @keyframes temblor {
+            0% { transform: rotate(0deg); }
+            25% { transform: rotate(2deg); }
+            75% { transform: rotate(-2deg); }
+            100% { transform: rotate(0deg); }
+        }
     </style>
 </head>
-<body onclick="playAudio()">
+<body onclick="activarAudioGlobal()">
 
     <div class="troll-container">
         <h1>🚫 ACCESO DENEGADO 🚫</h1>
@@ -96,7 +113,7 @@ $base_url = "/zoo-system/";
         <h2 id="msg">¡Ah ah ah! ¡No dijiste la palabra mágica!</h2>
         <p style="font-size: 0.9rem; opacity: 0.8;">Sistema de Seguridad ZooManager v1.0 activado.</p>
 
-        <a href="<?php echo $base_url; ?>index.php" class="btn-back">
+        <a href="<?php echo $base_url; ?>index.php" class="btn-back" id="escapeBtn">
             🏃‍♂️ ESCAPAR AHORA
         </a>
     </div>
@@ -107,20 +124,42 @@ $base_url = "/zoo-system/";
 
     <script>
         var audio = document.getElementById("trollSound");
-        
-        window.onload = function() {
-            var promise = audio.play();
-            if (promise !== undefined) {
-                promise.then(_ => {}).catch(error => {
-                    console.log("Autoplay bloqueado. Esperando clic.");
-                });
-            }
-        };
+        var btn = document.getElementById("escapeBtn");
+        var msg = document.getElementById("msg");
+        var trampaActivada = false;
 
-        function playAudio() {
-            audio.play();
+        // FUNCIÓN MAESTRA PARA ACTIVAR AUDIO
+        function activarAudioGlobal() {
+            audio.play().catch(e => console.log("Esperando interacción..."));
         }
-        document.body.addEventListener('mousemove', playAudio);
+
+        // TRAMPA 1: EL BOTÓN DE ESCAPE (DOBLE CLICK)
+        btn.addEventListener("click", function(event) {
+            
+            // Si el usuario intenta salir por primera vez...
+            if (!trampaActivada) {
+                event.preventDefault();     // Bloquear salida
+                event.stopPropagation();    // Evitar conflictos con el body
+                
+                activarAudioGlobal();       // SONIDO ON
+
+                // Efectos visuales de pánico
+                btn.classList.add("btn-trap");
+                btn.innerHTML = "⚠️ ¡INTÉNTALO OTRA VEZ! ⚠️";
+                msg.innerHTML = "¡ACCESO DENEGADO! ¡ACCESO DENEGADO!";
+                msg.style.color = "red";
+                
+                trampaActivada = true;      // Ahora sí le permitiremos salir
+            }
+            // La segunda vez, el evento fluye normal y sale de la página.
+        });
+
+        // TRAMPA 2: TECLADO (Cualquier tecla activa el audio)
+        document.addEventListener('keydown', activarAudioGlobal);
+
+        // INTENTO AUTOMÁTICO AL CARGAR (Por si acaso)
+        window.onload = activarAudioGlobal;
+
     </script>
 
 </body>

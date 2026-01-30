@@ -1,11 +1,25 @@
 <?php 
-// 1. Incluir Configuración y Header
+/**
+ * DASHBOARD PRINCIPAL (INDEX)
+ */
 
-// 2. Conexión a la Base de Datos
 require_once 'config/db.php'; 
+require 'includes/header.php'; // Aquí se cargan las funciones como esAdmin() y puedeVerAnimales()
 
-require 'includes/header.php';
-
+// LÓGICA DE ÚLTIMO ACCESO
+$fecha_acceso = "Primer ingreso";
+if (isset($_SESSION['user_id'])) {
+    try {
+        $stmt = $pdo->prepare("SELECT ultimo_acceso FROM users WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $resultado = $stmt->fetchColumn();
+        if ($resultado) {
+            $fecha_acceso = formatearFecha($resultado);
+        }
+    } catch (PDOException $e) {
+        // Silencioso
+    }
+}
 ?>
 
 <div class="container py-5">
@@ -13,60 +27,61 @@ require 'includes/header.php';
     <?php echo mostrarAlertas(); ?>
 
     <?php if (isset($_SESSION['user_id'])): ?>
+
         <div class="row justify-content-center mb-0">
             <div class="col-md-8 text-center">
+
                 <div class="p-4 card-material">
-                    <h1 class="display-5 fw-bold text-on-surface">👋 Hola, <?php echo limpiar($_SESSION['user_name']); ?></h1>
+                    <h1 class="display-5 fw-bold text-on-surface">
+                        👋 Hola, <?php echo limpiar($_SESSION['user_name']); ?>
+                    </h1>
                     <p class="lead text-muted">Bienvenido al Panel de Control de ZooManager.</p>
                     
-                    <div class="d-inline-block px-3 py-1 rounded-pill mb-3" 
-                        style="background-color: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">
-                        <strong>Rol:</strong> <?php echo ucfirst($_SESSION['user_role'] ?? 'Usuario'); ?>
+                    <div class="d-flex justify-content-center gap-2 mb-3">
+                        <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">
+                            <i class="bi bi-shield-lock"></i> Rol: <?php echo ucfirst($_SESSION['user_role'] ?? 'Usuario'); ?>
+                        </span>
+                        <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill">
+                            <i class="bi bi-clock-history"></i> Último acceso: <?php echo $fecha_acceso; ?>
+                        </span>
                     </div>
 
-                    <?php
-                    // Consultamos la fecha fresca de la base de datos
-                    $stmt = $pdo->prepare("SELECT ultimo_acceso FROM users WHERE id = ?");
-                    $stmt->execute([$_SESSION['user_id']]);
-                    $fecha_acceso = $stmt->fetchColumn();
-                    ?>
-
-                    <?php if ($fecha_acceso): ?>
-                        <p class="small text-muted mb-0">
-                            🕒 Último acceso: <strong><?php echo date('d/m/Y h:i A', strtotime($fecha_acceso)); ?></strong>
-                        </p>
-                    <?php endif; ?>
                 </div>
             </div>
 
-        <div class="row g-4 justify-content-center">
-            
-            <div class="col-md-5 col-lg-4">
-                <div class="card h-100 card-material text-center p-4">
-                    <div class="card-body">
-                        <div class="material-icon-large">🐾</div>
-                        <h3 class="card-title fw-bold">Animales</h3>
-                        <p class="card-text">Registrar nuevos ingresos, editar fichas y ver el listado completo.</p>
-                        <a href="views/admin/animals.php" class="btn btn-material-primary w-100 mt-3 stretched-link">
-                            Gestionar Animales
-                        </a>
+            <div class="row g-4 justify-content-center">
+
+                <?php if (puedeVerAnimales()): ?>
+                <div class="col-md-5 col-lg-4">
+                    <div class="card h-100 card-material text-center p-4">
+                        <div class="card-body">
+                            <div class="material-icon-large">🐾</div>
+                            <h3 class="card-title fw-bold">Animales</h3>
+                            <p class="card-text">Registrar nuevos ingresos, editar fichas y ver el listado completo.</p>
+                            <a href="views/admin/animals.php" class="btn btn-material-primary w-100 mt-3 stretched-link">
+                                Gestionar Animales
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
+                <?php endif; ?>
 
-            <div class="col-md-5 col-lg-4">
-                <div class="card h-100 card-material text-center p-4">
-                    <div class="card-body">
-                        <div class="material-icon-large">🌿</div>
-                        <h3 class="card-title fw-bold">Hábitats</h3>
-                        <p class="card-text">Control de zonas, climas y capacidad máxima de los recintos.</p>
-                        <a href="views/admin/habitats.php" class="btn btn-material-secondary w-100 mt-3 stretched-link">
-                            Gestionar Hábitats
-                        </a>
+                <?php if (esAdmin()): ?>
+                <div class="col-md-5 col-lg-4">
+                    <div class="card h-100 card-material text-center p-4">
+                        <div class="card-body">
+                            <div class="material-icon-large">🌿</div>
+                            <h3 class="card-title fw-bold">Hábitats</h3>
+                            <p class="card-text">Control de zonas, climas y capacidad máxima de los recintos.</p>
+                            <a href="views/admin/habitats.php" class="btn btn-material-secondary w-100 mt-3 stretched-link">
+                                Gestionar Hábitats
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
+                <?php endif; ?>
 
+            </div>
         </div>
 
     <?php else: ?>

@@ -1,8 +1,14 @@
 <?php
+/**
+ * VISTA: REGISTRAR EVENTO MÉDICO
+ * Formulario para agregar un nuevo diagnóstico o chequeo.
+ */
+
 require '../../includes/auth_check.php';
 require '../../config/db.php';
 require '../../includes/header.php';
 
+// Validar permisos
 if (!puedeVerAnimales()) {
     $_SESSION['error'] = "No tienes permisos para acceder al historial médico.";
     header("Location: " . BASE_URL . "index.php");
@@ -13,14 +19,20 @@ if (!puedeVerAnimales()) {
 $animal_id = $_GET['animal_id'] ?? null;
 
 if (!$animal_id) {
-    header("Location: animals.php");
+    header("Location: ../admin/animals.php");
     exit();
 }
 
-// Consultamos nombre
-$stmt = $pdo->prepare("SELECT nombre FROM animals WHERE id = ?");
-$stmt->execute([$animal_id]);
-$animal = $stmt->fetch();
+// Consultamos nombre para mostrarlo en el título
+try {
+    $stmt = $pdo->prepare("SELECT nombre FROM animals WHERE id = ?");
+    $stmt->execute([$animal_id]);
+    $animal = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$animal) die("Animal no encontrado.");
+} catch (PDOException $e) {
+    die("Error BD: " . $e->getMessage());
+}
 ?>
 
 <div class="auth-container">
@@ -34,24 +46,28 @@ $animal = $stmt->fetch();
                 </div>
             </div>
             <a href="medical_history.php?id=<?php echo $animal_id; ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                <i class="bi bi-x-lg"></i> Cancelar
+                <i class=\"bi bi-x-lg\"></i> Cancelar
             </a>
         </div>
 
         <?php echo mostrarAlertas(); ?>
-        
+
         <form action="../../actions/medical/medical_create_action.php" method="POST">
+            
             <input type="hidden" name="animal_id" value="<?php echo $animal_id; ?>">
 
             <div class="row g-3 mb-3">
-                <div class="col-md-4">
+                <div class="col-md-12">
                     <label class="form-label fw-semibold">Fecha del Suceso</label>
-                    <input type="date" name="fecha" class="form-control" required value="<?php echo date('Y-m-d'); ?>">
+                    <input type="date" name="fecha" class="form-control" required 
+                           value="<?php echo date('Y-m-d'); ?>">
                 </div>
-                <div class="col-md-8">
-                    <label class="form-label fw-semibold">Motivo de Consulta</label>
-                    <input type="text" name="descripcion" class="form-control" required placeholder="Ej: Revisión rutinaria, herida...">
-                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Motivo / Descripción</label>
+                <input type="text" name="descripcion" class="form-control" required 
+                       placeholder="Ej: Chequeo rutinario, Vacunación anual, Herida en pata...">
             </div>
 
             <div class="mb-3">
