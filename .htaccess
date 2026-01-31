@@ -13,7 +13,13 @@ Options -Indexes
 # - .env, .env.example (Variables de entorno)
 # - composer.json, package.json (Dependencias)
 # - digest.txt (Tu resumen de código)
-<FilesMatch "^\.(htaccess|htpasswd|git|env)|^(composer|package)\.(json|lock)|digest\.txt$">
+<FilesMatch "^\.(htaccess|htpasswd|git|env|installed)|^(composer|package)\.(json|lock)|digest\.txt$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# PROTEGER ARCHIVOS DE CONFIGURACION PHP (db.php, etc.)
+<FilesMatch "^(db|db_example)\.php$">
     Order Allow,Deny
     Deny from all
 </FilesMatch>

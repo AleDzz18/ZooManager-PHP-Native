@@ -4,7 +4,7 @@ require '../../config/db.php';
 require '../../includes/header.php';
 
 // Verificación de permisos
-if (!puedeVerAnimales()) {
+if (!esAdmin()) {
     $_SESSION['error'] = "No tienes permisos para acceder a la gestión de animales.";
     header("Location: " . BASE_URL . "index.php");
     exit();
@@ -19,12 +19,11 @@ try {
     // Traemos los datos del animal
     $stmt = $pdo->prepare("SELECT * FROM animals WHERE id = ?");
     $stmt->execute([$id]);
-    $animal = $stmt->fetch();
+    $animal = $stmt->fetch(PDO::FETCH_ASSOC);
 
     // Traemos los hábitats para el select
     $h_stmt = $pdo->query("SELECT id, nombre FROM habitats");
-    $habitats = $h_stmt->fetchAll();
-
+    $habitats = $h_stmt->fetchAll(PDO::FETCH_ASSOC);
     if (!$animal) { die("Animal no encontrado."); }
 } catch (PDOException $e) {
     die("Error: " . $e->getMessage());

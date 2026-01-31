@@ -6,6 +6,8 @@
 require_once 'config/db.php'; 
 require 'includes/header.php'; // Aquí se cargan las funciones como esAdmin() y puedeVerAnimales()
 
+ini_set('display_errors', 0);
+
 // LÓGICA DE ÚLTIMO ACCESO
 $fecha_acceso = "Primer ingreso";
 if (isset($_SESSION['user_id'])) {

@@ -3,6 +3,12 @@ require '../../includes/auth_check.php';
 require '../../includes/header.php';
 require_once '../../includes/functions.php';
 
+if (!esAdmin()) {
+    $_SESSION['error'] = "No tienes permisos para acceder a la gestión de habitats.";
+    header("Location: " . BASE_URL . "index.php");
+    exit();
+}
+
 ?>
 
 <div class="auth-container">

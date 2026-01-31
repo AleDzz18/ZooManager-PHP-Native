@@ -54,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // 8. GUARDAR DATOS EN LA SESIÓN
             // Estas variables estarán disponibles en TODAS las páginas (header.php las usa).
+            session_regenerate_id(true); // Previene secuestro de sesión
             $_SESSION['user_id'] = $usuario['id'];
             $_SESSION['user_name'] = $usuario['nombre_completo'];
             $_SESSION['user_role'] = $usuario['rol']; // Importante para permisos de Admin/Cuidador

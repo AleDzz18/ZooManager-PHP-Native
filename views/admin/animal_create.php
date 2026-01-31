@@ -4,7 +4,7 @@ require '../../includes/auth_check.php';
 require '../../config/db.php';
 require '../../includes/header.php';
 // Verificación de permisos
-if (!puedeVerAnimales()) {
+if (!esAdmin()) {
     $_SESSION['error'] = "No tienes permisos para acceder a la gestión de animales.";
     header("Location: " . BASE_URL . "index.php");
     exit();

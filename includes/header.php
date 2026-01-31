@@ -46,9 +46,11 @@ if (!defined('BASE_URL')) {
                             <a class="nav-link px-3" href="<?php echo BASE_URL; ?>views/admin/animals.php">Animales</a>
                         </li>  
                     <?php endif; ?>
-                    <li class="nav-item">
-                        <a class="nav-link px-3" href="<?php echo BASE_URL; ?>views/admin/habitats.php">Hábitats</a>
-                    </li>
+                    <?php if (esAdmin()): ?>    
+                        <li class="nav-item">
+                            <a class="nav-link px-3" href="<?php echo BASE_URL; ?>views/admin/habitats.php">Hábitats</a>
+                        </li>
+                    <?php endif; ?>
                 <?php endif; ?>
             </ul>
 
