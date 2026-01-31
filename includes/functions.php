@@ -47,7 +47,7 @@ function mostrarAlertas() {
 
 // 4. VERIFICADOR DE ROLES (Seguridad extra)
 
-// Comprueba si es Admin (Para borrar o gestionar usuarios)
+// Comprueba si es Admin (Para gestión completa)
 function esAdmin() {
     return isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin';
 }

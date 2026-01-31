@@ -9,7 +9,7 @@ require_once '../../includes/functions.php';
 soloMetodoPost(); 
 
 // 2. VERIFICAR PERMISOS (Solo Admin)
-if (!esAdmin()) {
+if (!puedeVerAnimales()) {
     $_SESSION['error'] = "No tienes permisos para eliminar registros médicos.";
     header("Location: ../../views/admin/animals.php");
     exit();
