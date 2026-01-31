@@ -4,7 +4,7 @@
  * Permite modificar un diagnóstico existente.
  */
 
-require '../../includes/auth_check.php';
+require '../../includes/auth_check.php'; // Verificación de autenticación
 require '../../config/db.php';
 require '../../includes/header.php';
 
@@ -67,7 +67,7 @@ try {
             <div class="mb-3">
                 <label class="form-label fw-semibold">Fecha</label>
                 <input type="date" name="fecha" class="form-control" required 
-                       value="<?php echo $registro['fecha']; ?>">
+                    value="<?php echo $registro['fecha']; ?>">
             </div>
 
             <div class="mb-4">

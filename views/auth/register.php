@@ -23,6 +23,8 @@ $pageTitle = "Registro de Personal";
 require '../../includes/header.php'; 
 ?>
 
+<!-- 4. ESTILOS ADICIONALES -->
+<!-- Evitar que el placeholder interfiera con la experiencia al escribir -->
 <style>
     input:focus::placeholder {
         color: transparent !important;

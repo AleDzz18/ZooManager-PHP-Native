@@ -9,7 +9,7 @@ soloMetodoPost();
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $nombre = limpiar($_POST['nombre']);
     $especie = limpiar($_POST['especie']);
-    $clima_animal = limpiar($_POST['clima']); // Nuevo campo
+    $clima_animal = limpiar($_POST['clima']);
     $clima_permitidos = obtenerClimasValidos();
     $edad = (int) $_POST['edad'];
     $dieta = limpiar($_POST['dieta']);
@@ -24,7 +24,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!in_array($clima_animal, $clima_permitidos)) {
         $_SESSION['error'] = "Error de seguridad: El clima '$clima_animal' no es válido.";
-        // Opcional: Podrías loguear esto como un intento de hackeo
         header("Location: ../../views/admin/animal_create.php");
         exit();
     }

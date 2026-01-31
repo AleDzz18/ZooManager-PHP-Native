@@ -67,7 +67,6 @@ try {
                     <select name="clima" id="clima" class="form-select" required>
                         <?php 
                         $climas = ["Selva", "Desierto", "Acuático", "Polar", "Aviario", "Sabana"];
-                        // Asumimos que $animal['clima'] existe tras actualizar la BD
                         $climaActual = $animal['clima'] ?? ''; 
                         foreach ($climas as $c): 
                         ?>

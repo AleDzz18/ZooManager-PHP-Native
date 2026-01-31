@@ -5,6 +5,9 @@ require_once '../../includes/functions.php';
 
 soloMetodoPost();
 
+// 1. SOLO PROCESAR SI ES POST
+// $_SERVER['REQUEST_METHOD'] ya está verificado en soloMetodoPost()
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 1. CAPTURAR DATOS
@@ -17,7 +20,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (!in_array($clima, $climas_permitidos)) {
         $_SESSION['error'] = "Error de seguridad: El clima '$clima' no es válido.";
-        // Opcional: Podrías loguear esto como un intento de hackeo
         header("Location: ../../views/admin/habitat_edit.php?id=" . $id);
         exit();
     }

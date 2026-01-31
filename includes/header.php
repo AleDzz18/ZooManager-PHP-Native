@@ -1,9 +1,12 @@
 <?php
+// includes/header.php
+
+// Iniciar sesión si no está iniciada
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once 'functions.php';
+require_once 'functions.php'; // Asegura que las funciones estén disponibles
 
 if (!defined('BASE_URL')) {
     define('BASE_URL', 'http://localhost/zoo-system/');
@@ -37,6 +40,8 @@ if (!defined('BASE_URL')) {
 
         <div class="collapse navbar-collapse" id="navMain">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <!-- Menú dinámico según permisos -->
+                <!-- Si el usuario está logueado -->
                 <?php if (isset($_SESSION['user_id'])): ?>
                     <li class="nav-item">
                         <a class="nav-link px-3" href="<?php echo BASE_URL; ?>index.php">Inicio</a>

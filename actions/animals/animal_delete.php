@@ -16,7 +16,6 @@ if (!esAdmin()) {
 }
 
 // 3. CAPTURAR EL ID DESDE EL FORMULARIO (POST)
-// Ya no usamos $_GET['id']
 $id = isset($_POST['id']) ? $_POST['id'] : null;
 
 if ($id) {

@@ -24,10 +24,10 @@ if (ob_get_level() == 0) ob_start();
 
 // 2. CREDENCIALES (MODIFICAR SEGÚN TU ENTORNO)
 $host = 'localhost';
-$port = '3306';          // Cambiar a 3307 si usas MariaDB en XAMPP específico
-$dbname = 'zoo_system';
+$port = '3306';
+$dbname = '';
 $username = 'root';
-$password = '';          // En XAMPP local suele ser vacío
+$password = '';
 
 try {
     $dsn = "mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4";

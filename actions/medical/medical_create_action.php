@@ -6,6 +6,9 @@ require_once '../../includes/functions.php';
 
 soloMetodoPost();
 
+// 1. SOLO PROCESAR SI ES POST
+// $_SERVER['REQUEST_METHOD'] ya está verificado en soloMetodoPost()
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // 1. CAPTURAR DATOS

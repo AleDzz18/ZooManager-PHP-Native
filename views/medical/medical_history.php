@@ -1,10 +1,9 @@
 <?php
-/**
- * VISTA: HISTORIAL MÉDICO
- * Diseño original preservado - Lógica corregida
- */
 
-require '../../includes/auth_check.php';
+// VISTA: HISTORIAL MÉDICO
+
+
+require '../../includes/auth_check.php'; // Verificación de autenticación
 require '../../config/db.php';
 require '../../includes/header.php';
 
@@ -144,7 +143,7 @@ try {
                                 <?php endif; ?>
                             </tr>
                         <?php endforeach; ?>
-                        
+                        <!-- MENSAJE CUANDO NO HAY REGISTROS -->
                         <?php if (empty($registros)): ?>
                             <tr>
                                 <td colspan="6" class="text-center py-5">

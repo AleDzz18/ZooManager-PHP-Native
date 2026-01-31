@@ -27,6 +27,7 @@ if (!$animal_id) {
 try {
     $stmt = $pdo->prepare("SELECT nombre FROM animals WHERE id = ?");
     $stmt->execute([$animal_id]);
+    // PDO::FETCH_ASSOC para obtener un array asociativo
     $animal = $stmt->fetch(PDO::FETCH_ASSOC);
     
     if (!$animal) die("Animal no encontrado.");
@@ -46,7 +47,7 @@ try {
                 </div>
             </div>
             <a href="medical_history.php?id=<?php echo $animal_id; ?>" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
-                <i class=\"bi bi-x-lg\"></i> Cancelar
+                <i class="bi bi-x-lg"></i> Cancelar
             </a>
         </div>
 
@@ -60,14 +61,14 @@ try {
                 <div class="col-md-12">
                     <label class="form-label fw-semibold">Fecha del Suceso</label>
                     <input type="date" name="fecha" class="form-control" required 
-                           value="<?php echo date('Y-m-d'); ?>">
+                        value="<?php echo date('Y-m-d'); ?>">
                 </div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label fw-semibold">Motivo / Descripción</label>
                 <input type="text" name="descripcion" class="form-control" required 
-                       placeholder="Ej: Chequeo rutinario, Vacunación anual, Herida en pata...">
+                    placeholder="Ej: Chequeo rutinario, Vacunación anual, Herida en pata...">
             </div>
 
             <div class="mb-3">

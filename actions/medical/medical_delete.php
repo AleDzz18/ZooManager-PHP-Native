@@ -19,9 +19,6 @@ if (!esAdmin()) {
 // Usamos $_POST['id'] directamente. Si no existe, probamos $_REQUEST por seguridad.
 $id = $_POST['id'] ?? null;
 
-// DEBUG (Opcional): Si sale error, descomenta la siguiente línea para ver qué llega
-// var_dump($_POST); die(); 
-
 if ($id) {
     try {
         // A) BUSCAR EL ANIMAL_ID ANTES DE BORRAR

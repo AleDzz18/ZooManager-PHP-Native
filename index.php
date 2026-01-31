@@ -1,7 +1,6 @@
 <?php 
-/**
- * DASHBOARD PRINCIPAL (INDEX)
- */
+
+ // DASHBOARD PRINCIPAL (INDEX)
 
 require_once 'config/db.php'; 
 require 'includes/header.php'; // Aquí se cargan las funciones como esAdmin() y puedeVerAnimales()
@@ -10,6 +9,7 @@ ini_set('display_errors', 0);
 
 // LÓGICA DE ÚLTIMO ACCESO
 $fecha_acceso = "Primer ingreso";
+// Obtener la última fecha de acceso del usuario desde la base de datos
 if (isset($_SESSION['user_id'])) {
     try {
         $stmt = $pdo->prepare("SELECT ultimo_acceso FROM users WHERE id = ?");
@@ -25,7 +25,8 @@ if (isset($_SESSION['user_id'])) {
 ?>
 
 <div class="container py-5">
-    
+    <!-- Funcion de alertas -->
+    <!-- Muestra mensajes de éxito o error -->
     <?php echo mostrarAlertas(); ?>
 
     <?php if (isset($_SESSION['user_id'])): ?>
@@ -35,6 +36,8 @@ if (isset($_SESSION['user_id'])) {
 
                 <div class="p-4 card-material">
                     <h1 class="display-5 fw-bold text-on-surface">
+                        <!-- Funcion de Limpiar -->
+                        <!-- Sirve para prevenir ataques XSS mostrando texto limpio -->
                         👋 Hola, <?php echo limpiar($_SESSION['user_name']); ?>
                     </h1>
                     <p class="lead text-muted">Bienvenido al Panel de Control de ZooManager.</p>
@@ -53,6 +56,8 @@ if (isset($_SESSION['user_id'])) {
 
             <div class="row g-4 justify-content-center">
 
+                <!-- Tarjeta de Animales -->
+                <!-- Mostrar solo si el usuario tiene permisos para ver animales -->
                 <?php if (puedeVerAnimales()): ?>
                 <div class="col-md-5 col-lg-4">
                     <div class="card h-100 card-material text-center p-4">
@@ -67,7 +72,9 @@ if (isset($_SESSION['user_id'])) {
                     </div>
                 </div>
                 <?php endif; ?>
-
+                
+                <!-- Tarjeta de Hábitats -->
+                <!-- Mostrar solo a administradores -->
                 <?php if (esAdmin()): ?>
                 <div class="col-md-5 col-lg-4">
                     <div class="card h-100 card-material text-center p-4">
