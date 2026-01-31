@@ -8,6 +8,11 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
 if (!defined('BASE_URL')) define('BASE_URL', 'http://localhost/zoo-system/');
 
+if (empty($_SESSION['csrf_token'])) {
+    // Generamos un token criptográficamente seguro
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Si ya está logueado, fuera de aquí
 if (isset($_SESSION['user_id'])) {
     header("Location: " . BASE_URL . "index.php");
