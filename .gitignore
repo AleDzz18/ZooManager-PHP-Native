@@ -37,3 +37,5 @@ php_errors.log
 # --- 6. ARCHIVOS ESPECÍFICOS DEL PROYECTO ---
 # Resumen de código (para IA o auditoría)
 digest.txt
+# Archivo ZIP para exportar el proyecto
+ZooManager.zip
