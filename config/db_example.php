@@ -26,7 +26,7 @@ define('BASE_URL', '/zoo-system/');
 ini_set('display_errors', 0); 
 if (ob_get_level() == 0) ob_start();
 
-// PASO 4: CREDENCIALES (MODIFICAR SEGÚN TU ENTORNO LOCAL)[cite: 3]
+// PASO 4: CREDENCIALES (MODIFICAR SEGÚN TU ENTORNO LOCAL)
 $host = 'localhost';
 $port = '3306'; 
 $dbname = 'NOMBRE_DE_TU_BASE_DE_DATOS';

@@ -26,10 +26,10 @@ Options -Indexes
 
 # 3. PÁGINAS DE ERROR PERSONALIZADAS
 # Redirigimos al usuario a nuestras vistas bonitas cuando algo falla.
-ErrorDocument 403 /zoo-system/views/errors/403.php
-ErrorDocument 404 /zoo-system/views/errors/404.php
-ErrorDocument 500 /zoo-system/views/errors/500.php
-ErrorDocument 503 /zoo-system/views/errors/500.php
+ErrorDocument 403 /views/errors/403.php
+ErrorDocument 404 /views/errors/404.php
+ErrorDocument 500 /views/errors/500.php
+ErrorDocument 503 /views/errors/500.php
 
 # 4. SEGURIDAD ADICIONAL (HEADERS)
 <IfModule mod_headers.c>
