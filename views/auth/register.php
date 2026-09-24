@@ -6,7 +6,8 @@
 // 1. LÓGICA DE SESIÓN (Al principio)
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-if (!defined('BASE_URL')) define('BASE_URL', 'http://localhost/zoo-system/');
+// Requerimos db.php para obtener la conexión y la constante BASE_URL de la nube
+require_once '../../config/db.php';
 
 if (isset($_SESSION['user_id'])) {
     header("Location: " . BASE_URL . "index.php");

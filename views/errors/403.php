@@ -1,7 +1,7 @@
 <?php
 // views/errors/403.php
-// RUTA ABSOLUTA
-$base_url = "/zoo-system/";
+// RUTA DE PRODUCCIÓN EN LA NUBE (RAÍZ)
+$base_url = "/";
 ?>
 <!DOCTYPE html>
 <html lang="es">

@@ -1,7 +1,7 @@
 <?php
 // views/errors/404.php
-// Definimos la ruta base manualmente para cargar los estilos
-$base_url = "http://localhost/zoo-system/";
+// RUTA DE PRODUCCIÓN EN LA NUBE (RAÍZ)
+$base_url = "/";
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -15,7 +15,7 @@ $base_url = "http://localhost/zoo-system/";
     <link rel="stylesheet" href="<?php echo $base_url; ?>assets/css/light.css">
     <style>
         body {
-            background-color: #f0f2f5; /* Un gris claro para el fondo */
+            background-color: #f0f2f5;
             display: flex;
             align-items: center;
             justify-content: center;

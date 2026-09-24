@@ -6,13 +6,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once 'functions.php'; // Asegura que las funciones estén disponibles
+// Importamos la configuración central (que contiene el BASE_URL de la nube)
+require_once __DIR__ . '/../config/db.php'; 
+require_once __DIR__ . '/functions.php'; // Asegura que las funciones estén disponibles
 
-if (!defined('BASE_URL')) {
-    define('BASE_URL', 'http://localhost/zoo-system/');
-}
 ?>
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
