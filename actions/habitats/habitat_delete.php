@@ -4,22 +4,25 @@ require_once '../../config/db.php';
 require_once '../../includes/auth_check.php';
 require_once '../../includes/functions.php';
 
-// 1. SEGURIDAD: SOLO POST
+// PASO 1: SEGURIDAD DE MÉTODO
 soloMetodoPost(); 
 
-// 2. VERIFICAR PERMISOS (Solo Admin)
-if (!esAdmin()) {
-    $_SESSION['error'] = "Acceso denegado. Solo administradores pueden eliminar hábitats.";
-    header("Location: ../../views/admin/habitats.php");
+// PASO 2: CONTROL DE ACCESO BASADO EN ROLES (RBAC)
+// Verificamos si el usuario tiene el privilegio específico para administrar la infraestructura del zoológico.
+if (!puedeGestionarHabitats()) {
+    $_SESSION['error'] = "Acceso denegado. No tienes permisos para eliminar hábitats.";
+    header("Location: " . BASE_URL . "views/admin/habitats.php");
     exit();
 }
 
-// 3. CAPTURAR ID DESDE POST
+// PASO 3: EXTRACCIÓN DEL IDENTIFICADOR
 $id = isset($_POST['id']) ? $_POST['id'] : null;
 
 if ($id) {
     try {
-        // Ejecutamos el borrado
+        // PASO 4: BORRADO SEGURO
+        // Al borrar el hábitat, cualquier animal que tuviera este 'habitat_id' quedará huérfano 
+        // (suponiendo que la base de datos tiene configurado ON DELETE SET NULL en su llave foránea).
         $sql = "DELETE FROM habitats WHERE id = ?";
         $stmt = $pdo->prepare($sql);
         
@@ -30,12 +33,15 @@ if ($id) {
         }
 
     } catch (PDOException $e) {
-        $_SESSION['error'] = "Error de base de datos: " . $e->getMessage();
+        // Enmascaramos el error técnico y lo registramos en el servidor
+        registrarErrorCritico($e, "views/admin/habitats.php", "No se pudo completar la eliminación del hábitat.");
+        exit();
     }
 } else {
     $_SESSION['error'] = "Error: ID no recibido.";
 }
 
-header("Location: ../../views/admin/habitats.php");
+// PASO 5: REDIRECCIÓN
+header("Location: " . BASE_URL . "views/admin/habitats.php");
 exit();
 ?>

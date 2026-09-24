@@ -4,32 +4,33 @@ require_once '../../config/db.php';
 require_once '../../includes/auth_check.php';
 require_once '../../includes/functions.php';
 
+// PASO 1: BLOQUEO POR SEGURIDAD
 soloMetodoPost();
 
-// 1. SOLO PROCESAR SI ES POST
-// $_SERVER['REQUEST_METHOD'] ya está verificado en soloMetodoPost()
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // 2. CAPTURAR DATOS DEL FORMULARIO
-    $id = $_POST['id'];             // ID del registro médico
-    $animal_id = $_POST['animal_id']; // ID del animal (para volver al historial)
+    // PASO 2: EXTRACCIÓN DE METADATOS Y LIMPIEZA
+    $id = $_POST['id'];               // El ID de la consulta médica que estamos editando
+    $animal_id = $_POST['animal_id']; // El paciente (vital para saber a dónde volver luego)
     
     $fecha = $_POST['fecha'];
+    
+    // Limpiamos todo el texto ingresado por el usuario para prevenir inyección de scripts HTML/JS
     $descripcion = limpiar($_POST['descripcion']);
     $diagnostico = limpiar($_POST['diagnostico']);
     $tratamiento = limpiar($_POST['tratamiento']);
     $severidad = $_POST['severidad'];
 
-    // 3. VALIDACIÓN BÁSICA
+    // PASO 3: VALIDACIÓN BÁSICA
     if (empty($descripcion) || empty($fecha)) {
         $_SESSION['error'] = "La fecha y la descripción no pueden estar vacías.";
-        // Si falla, volvemos al formulario de edición
-        header("Location: ../../views/medical/medical_edit.php?id=" . $id);
+        // Si hay un error, devolvemos al usuario al formulario de edición de este registro específico.
+        header("Location: " . BASE_URL . "views/medical/medical_edit.php?id=" . $id);
         exit();
     }
 
     try {
-        // 4. ACTUALIZAR EN BASE DE DATOS
+        // PASO 4: ACTUALIZACIÓN BLINDADA (PREPARED STATEMENTS)
         $sql = "UPDATE medical_records 
                 SET fecha = ?, 
                     descripcion = ?, 
@@ -39,24 +40,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 WHERE id = ?";
         
         $stmt = $pdo->prepare($sql);
-        // El orden del array debe coincidir con los signos de interrogación (?)
+        
+        // IMPORTANTE: El orden de este arreglo debe coincidir exactamente con las posiciones de los '?' en el UPDATE.
         $stmt->execute([$fecha, $descripcion, $diagnostico, $tratamiento, $severidad, $id]);
 
-        // 5. MENSAJE DE ÉXITO Y REDIRECCIÓN
+        // PASO 5: REDIRECCIÓN AL CONTEXTO ORIGINAL
         $_SESSION['success'] = "Registro médico actualizado correctamente.";
-        
-        // Redirigimos al historial del animal (usando su ID)
-        header("Location: ../../views/medical/medical_history.php?id=" . $animal_id);
+        header("Location: " . BASE_URL . "views/medical/medical_history.php?id=" . $animal_id);
         exit();
 
     } catch (PDOException $e) {
-        // ERROR TÉCNICO
-        $_SESSION['error'] = "Error al actualizar: " . $e->getMessage();
-        header("Location: ../../views/medical/medical_edit.php?id=" . $id);
-        exit();
+        // PASO 6: PROTECCIÓN CONTRA FUGAS DE INFORMACIÓN (INFORMATION DISCLOSURE)
+        registrarErrorCritico($e, "views/medical/medical_edit.php?id=" . $id, "Error al actualizar el registro médico.");
     }
 } else {
-    // Si intentan entrar directo, fuera.
-    header("Location: ../../views/admin/animals.php");
+    header("Location: " . BASE_URL . "views/admin/animals.php");
     exit();
 }

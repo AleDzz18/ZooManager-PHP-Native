@@ -1,86 +1,91 @@
 <?php
-// 1. INICIAR SESIÓN
-// Necesario para guardar los datos del usuario si el login es exitoso.
+// PASO 1: INICIALIZACIÓN Y CONFIGURACIÓN
+// Iniciamos la sesión para poder acceder a la variable global $_SESSION y guardar los datos del usuario.
 session_start();
-
-// 2. CONEXIÓN A LA BASE DE DATOS
 require_once '../../config/db.php';
 require_once '../../includes/functions.php';
 
+// PASO 2: SEGURIDAD DE ACCESO
+// Bloqueamos el acceso si el usuario intenta llegar a este archivo escribiendo la URL (Método GET).
 soloMetodoPost();
 
-// 3. VERIFICAR MÉTODO POST
-// Solo procesamos si los datos vienen del formulario.
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
-    // 4. LIMPIEZA DE DATOS
+    // PASO 3: RECOLECCIÓN Y LIMPIEZA DE DATOS
+    // Usamos nuestra función limpiar() para sanitizar el email y evitar inyecciones de scripts (XSS).
     $email = limpiar($_POST['email']);
+    
+    // NOTA DE SEGURIDAD: La contraseña NO se limpia con htmlspecialchars ni trim, 
+    // ya que si un usuario usa espacios o caracteres especiales válidos en su clave, los alteraríamos y no podría entrar.
     $password_ingresada = $_POST['password'];
 
-    // 5. VALIDACIÓN DE CAMPOS VACÍOS
+    // PASO 4: VALIDACIÓN BÁSICA
     if (empty($email) || empty($password_ingresada)) {
         $_SESSION['error'] = "Por favor, completa todos los campos.";
-        header("Location: ../../views/auth/login.php");
+        header("Location: " . BASE_URL . "views/auth/login.php");
         exit();
     }
 
     try {
-        // 6. BUSCAR AL USUARIO POR EMAIL
-        // Preparamos la consulta SQL para evitar inyección de código.
+        // PASO 5: BÚSQUEDA DEL USUARIO (PREVINIENDO INYECCIÓN SQL)
+        // Preparamos la consulta (?) en lugar de concatenar la variable directamente.
         $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
         
-        // fetch(PDO::FETCH_ASSOC) nos devuelve los datos del usuario como un array asociativo.
+        // Obtenemos los datos del usuario en forma de array asociativo. Si no existe, devuelve false.
         $usuario = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // 7. VERIFICACIÓN DE CREDENCIALES
-        // Revisamos dos cosas:
-        // A) ¿Existe el usuario? ($usuario no es falso)
-        // B) ¿La contraseña coincide? Usamos password_verify() que compara texto plano vs hash.
+        // PASO 6: VERIFICACIÓN DE CREDENCIALES
+        // Comprobamos 2 cosas al mismo tiempo: 
+        // 1. Que el usuario exista ($usuario).
+        // 2. Que la clave ingresada coincida con el "hash" guardado usando password_verify().
         if ($usuario && password_verify($password_ingresada, $usuario['password'])) {
             
             // --- ¡LOGIN EXITOSO! ---
 
-            // =================================================================
-            // ACTUALIZAR ÚLTIMO ACCESO
-            // =================================================================
+            // PASO 7: ACTUALIZAR ÚLTIMO ACCESO (OPCIONAL/SILENCIOSO)
+            // Intentamos guardar la fecha y hora de este login. 
+            // Si la base de datos falla en esto, ignoramos el error para no arruinarle el login al usuario.
             try {
                 $sql_update = "UPDATE users SET ultimo_acceso = NOW() WHERE id = ?";
                 $stmt_update = $pdo->prepare($sql_update);
                 $stmt_update->execute([$usuario['id']]);
             } catch (PDOException $e) {
-                // Si falla actualizar la fecha, continuamos sin interrumpir el login
+                // Falla silenciosa para el log de acceso
             }
 
-            // 8. GUARDAR DATOS EN LA SESIÓN
-            // Estas variables estarán disponibles en TODAS las páginas (header.php las usa).
-            session_regenerate_id(true); // Previene secuestro de sesión
+            // PASO 8: PREVENCIÓN DE SECUESTRO DE SESIÓN (SESSION HIJACKING)
+            // Regeneramos el ID de la sesión. Esto cambia la "cookie" interna del navegador.
+            // Si un atacante robó el ID de sesión viejo, este paso lo vuelve inútil.
+            session_regenerate_id(true);
+            
+            // PASO 9: CREACIÓN DE VARIABLES GLOBALES DE SESIÓN
+            // Guardamos los datos que necesitaremos en todo el sistema.
             $_SESSION['user_id'] = $usuario['id'];
             $_SESSION['user_name'] = $usuario['nombre_completo'];
-            $_SESSION['user_role'] = $usuario['rol']; // Importante para permisos de Admin/Cuidador
+            $_SESSION['user_role'] = $usuario['rol'];
 
-            // 9. REDIRECCIONAR AL DASHBOARD
-            // Por ahora vamos al inicio, pero luego iremos al panel de administración.
-            header("Location: ../../index.php");
+            // Redireccionamos al panel principal.
+            header("Location: " . BASE_URL . "index.php");
             exit();
 
         } else {
             // --- LOGIN FALLIDO ---
-            
-            // Nota de Seguridad: No decimos "El usuario no existe" o "La contraseña está mal".
-            // Decimos "Credenciales incorrectas" para no dar pistas a hackers.
+            // NOTA DE SEGURIDAD: Nunca especificamos qué falló (si el correo o la clave).
+            // Usamos un mensaje genérico ("Credenciales incorrectas") para no dar pistas a posibles atacantes 
+            // sobre qué correos están registrados en nuestro sistema.
             $_SESSION['error'] = "Credenciales incorrectas. Inténtalo de nuevo.";
-            header("Location: ../../views/auth/login.php");
+            header("Location: " . BASE_URL . "views/auth/login.php");
             exit();
         }
 
     } catch (PDOException $e) {
-        // 10. ERROR TÉCNICO
-        die("Error en el sistema de login: " . $e->getMessage());
+        // Manejador de errores para evitar la "Pantalla Blanca de la Muerte" y proteger detalles técnicos.
+        registrarErrorCritico($e, "views/auth/login.php", "Error en el sistema al intentar iniciar sesión.");
     }
 
 } else {
-    // Si intentan entrar directo por URL, los devolvemos al formulario.
-    header("Location: ../../views/auth/login.php");
+    // Redirección por si esquivan soloMetodoPost()
+    header("Location: " . BASE_URL . "views/auth/login.php");
     exit();
 }
